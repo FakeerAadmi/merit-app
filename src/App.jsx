@@ -15,17 +15,17 @@ const[cat,setCat]=useState(null);const[sub,setSub]=useState("");const[pris,setPr
 const[budget,setBudget]=useState("");const[hh,setHh]=useState("3-4");const[notes,setNotes]=useState("");
 const[apiKey,setApiKey]=useState("");const[apiSaved,setApiSaved]=useState(false);
 const[loading,setLoading]=useState(false);const[result,setResult]=useState("");const[error,setError]=useState("");
-const[catQ,setCatQ]=useState("");const[labMode,setLabMode]=useState("pc");
+const[catQ,setCatQ]=useState("");const[saved,setSaved]=useState([]);const[labMode,setLabMode]=useState("pc");
 const[pcP,setPcP]=useState({});const[pcB,setPcB]=useState("");const[pcU,setPcU]=useState("");const[labN,setLabN]=useState("");
 const[qS,setQS]=useState(0);const[qA,setQA]=useState([]);
 const[cW,setCW]=useState("");const[cH,setCH]=useState("");const[cR,setCR]=useState("8");
 const[dP,setDP]=useState("");const[dPr,setDPr]=useState("");const[showT,setShowT]=useState(false);
 const rR=useRef(null);
 
-useEffect(()=>{const k=localStorage.getItem("m_key");if(k){setApiKey(k);setApiSaved(true);}const c=localStorage.getItem("m_city");if(c){setCity(c);setCityQ(c);}const l=localStorage.getItem("m_lang");if(l)setLang(l);},[]);
+useEffect(()=>{const k=localStorage.getItem("m_key");if(k){setApiKey(k);setApiSaved(true);}const c=localStorage.getItem("m_city");if(c){setCity(c);setCityQ(c);}const l=localStorage.getItem("m_lang");if(l)setLang(l);const s=localStorage.getItem("m_saved");if(s)setSaved(JSON.parse(s));},[]);
 const saveK=()=>{if(apiKey.trim()){localStorage.setItem("m_key",apiKey.trim());setApiSaved(true);}};
 const selC=(c)=>{setCity(c);setCityQ(c);setShowCD(false);localStorage.setItem("m_city",c);};
-const setL=(l)=>{setLang(l);localStorage.setItem("m_lang",l);};
+const setL=(l)=>{setLang(l);localStorage.setItem("m_lang",l);};const togS=(r)=>{setSaved(p=>{const isS=p.find(x=>x.name===r.name);const n=isS?p.filter(x=>x.name!==r.name):[...p,r];localStorage.setItem("m_saved",JSON.stringify(n));return n;});};
 const togP=(id)=>setPris(p=>p.includes(id)?p.filter(x=>x!==id):p.length<5?[...p,id]:p);
 const co=CATS.find(c=>c.id===cat);const bds=BUD[cat]||BUD.default;
 const fCi=CITIES.filter(c=>c.toLowerCase().includes(cityQ.toLowerCase())).slice(0,6);
@@ -34,7 +34,7 @@ const langI=lang==="mr"?"\n\nIMPORTANT: Respond ENTIRELY in Marathi (मरा�
 
 const callAI=async(prompt)=>{if(!apiKey){setError(lang==="mr"?"कृपया सेटिंग्जमध्ये Gemini API की सेट करा.":"Set your Gemini API key in settings.");return;}setLoading(true);setError("");setResult("");try{const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt+langI}]}],generationConfig:{temperature:0.7,maxOutputTokens:5000}})});if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`Error ${r.status}`);}const d=await r.json();const tx=d?.candidates?.[0]?.content?.parts?.[0]?.text;if(!tx)throw new Error("Empty response");setResult(tx);}catch(e){setError(e.message);}finally{setLoading(false);}};
 
-const getRec=()=>{const pl=pris.map((p,i)=>`${i+1}. ${t(PRIS.find(o=>o.id===p)?.l)}`).join(", ");callAI(`You are merit. — India's most trusted, unbiased home tech advisor.\n\n**Request:** Best ${sub||""} ${t(co?.tk)} recommendation\n**City:** ${city||"Not specified"} | **Household:** ${hh} members | **Budget:** ${budget||"Flexible"}\n**Priorities:** ${pl||"None"}\n**Notes:** ${notes||"None"}\n\nRespond:\n## Top 3 Recommendations\nFor each: ### [Rank]. [Model] — ₹[Price]\n- **Why:** match priorities\n- **Badge:** 1 short tag (e.g. 🏆 Best Value, 🌱 Energy Saver)\n- **Key Specs:** 5 specs\n- **Best For:** ideal user\n- **Honest Con:** 1 limitation\n- **Buy From:** best platform\n\n## Quick Comparison\nCompare using ★ 1-5\n\n## Expert Verdict\n3-4 sentences\n\n## After-Purchase Checklist\n4 items\n\n## What Dealers Hide\n3 insider facts\n\nRules: Current 2025-2026 India products. Specific models. Simple language.`).then(()=>{setView("result");setTimeout(()=>rR.current?.scrollIntoView({behavior:"smooth"}),100);});};
+const getRec=()=>{const pl=pris.map((p,i)=>`${i+1}. ${t(PRIS.find(o=>o.id===p)?.l)}`).join(", ");const pr=`You are merit. — India's trusted tech advisor.\n\n**Request:** Best ${sub||""} ${t(co?.tk)} recommendation\n**City:** ${city||"Not specified"} | **Household:** ${hh} members | **Budget:** ${budget||"Flexible"}\n**Priorities:** ${pl||"None"}\n**Notes:** ${notes||"None"}\n\nProvide exactly 7 unbiased product recommendations (1 exact match, 2 all-rounders, 4 alternatives/wildcards).\nYou MUST output ONLY valid JSON exactly matching this structure:\n{\n  "recs": [\n    { "name": "Model", "price": "45000", "badge": "🏆 Best Value", "specs": ["spec 1", "spec 2"], "why": "reason", "cons": "tradeoff" }\n  ],\n  "advice": ["Tip 1", "Tip 2"],\n  "comparison": "A short 2-sentence summary comparing the options."\n}\n\nDo not use Markdown code blocks. Just valid JSON.`;callAI(pr).then(()=>{setView("result");setTimeout(()=>rR.current?.scrollIntoView({behavior:"smooth"}),100);});};
 
 const getLabR=()=>{const ps=Object.entries(pcP).filter(([,v])=>v).map(([k,v])=>`${PCP.find(p=>p.id===k)?.n}: ${v}`).join("\n");const pr=labMode==="pc"?`PC Build advisor. Budget: ${pcB||"Flexible"}, Use: ${pcU||"General"}\nParts:\n${ps||"None"}\nNotes: ${labN||"None"}\n\nProvide: Build Analysis, Recommended Build (₹ prices), Compatibility Check, Performance Estimates, Upgrade Path, Where to Buy, Pro Tips`:labMode==="setup"?`Gaming setup advisor. Budget: ${pcB||"Flexible"}, Use: ${pcU||"General"}\nNotes: ${labN||"None"}\n\nRecommend complete setup with ₹ prices.`:`Home theater advisor. Budget: ${pcB||"Flexible"}, Room: ${labN||"Not specified"}\n\nRecommend TV/audio/streaming with ₹ prices.`;callAI(`You are merit. Lab — advanced advisor. Do DEEP research.\n\n${pr}`).then(()=>{setView("labResult");setTimeout(()=>rR.current?.scrollIntoView({behavior:"smooth"}),100);});};
 
@@ -59,17 +59,35 @@ const EB=()=>error?<div style={{background:"#fff2f2",borderRadius:12,padding:"12
 const ScamBox=({id})=>(<div style={{borderRadius:16,padding:"24px 28px",border:"1.5px solid #d2d2d7",background:"linear-gradient(135deg,#f5f5f7,#eef0f3)",marginTop:24}}><div style={{display:"flex",gap:10,alignItems:"center",marginBottom:16}}><Ic name="shield" size={22} color="#34c759"/><span style={{fontSize:18,fontWeight:700,fontFamily:"inherit"}}>{t("scamT")}</span></div>{scam(id).map((tip,i)=>(<div key={i} style={{display:"flex",gap:10,marginBottom:8,fontSize:14,lineHeight:1.6,color:"#48484a"}}><Ic name="check" size={16} color="#34c759"/><span>{tip}</span></div>))}</div>);
 const wts=[[t("wCeil"),"75"],[t("wTv"),"80"],[t("wFr"),"150"],[t("wAc1"),"1000"],[t("wAc15"),"1500"],[t("wGey"),"2000"],[t("wWash"),"500"],[t("wMic"),"1200"]];
 
+let pR=null;try{if(result&&result.includes('"recs"'))pR=JSON.parse(result.replace(/```json/gi,"").replace(/```/g,"").trim());}catch(e){}
 return(
 <div style={{minHeight:"100vh",background:"var(--bg)"}}>
 {/* NAV */}
 <nav style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 28px",borderBottom:"1px solid var(--border)",background:"rgba(245,245,247,.8)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",position:"sticky",top:0,zIndex:100}}>
 <div onClick={()=>{setView("home");setCatQ("");setError("");}} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:10}}><div style={{width:32,height:32,borderRadius:8,background:"#1d1d1f",display:"grid",placeItems:"center"}}><span style={{color:"#fff",fontSize:16,fontWeight:800,fontFamily:"inherit"}}>m</span></div><span style={{fontFamily:"inherit",fontSize:22,color:"#1d1d1f",letterSpacing:-.5}}>merit.</span></div>
 <div style={{display:"flex",gap:4,background:"#e8e8ed",borderRadius:10,padding:3}}>{[["home",t("hmdT")],["browse",t("allCats")],["lab",t("lab")]].map(([v,l])=>(<button key={v} onClick={()=>{setView(v);setError("");}} style={{padding:"7px 16px",borderRadius:8,border:"none",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",background:(v==="home"&&isH) || (v==="browse"&&view==="browse")||(v==="lab"&&isLa)||(v==="tools"&&isTo)?"#fff":"transparent",color:"#1d1d1f",boxShadow:(v==="home"&&isH) || (v==="browse"&&view==="browse")||(v==="lab"&&isLa)||(v==="tools"&&isTo)?"0 1px 3px rgba(0,0,0,.1)":"none"}}>{l}</button>))}</div>
-<div style={{display:"flex",gap:8,alignItems:"center"}}><button onClick={()=>setL(lang==="en"?"mr":"en")} style={{padding:"5px 12px",borderRadius:8,border:"1.5px solid var(--border)",background:lang==="mr"?"var(--accentBg)":"#fff",cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:"inherit",color:lang==="mr"?"var(--accent)":"var(--sub)",display:"flex",alignItems:"center",gap:4}}><Ic name="lang" size={14}/>{lang==="mr"?"मरा":"EN"}</button><button onClick={()=>setView("settings")} style={{padding:"6px 12px",borderRadius:8,border:"1.5px solid var(--border)",background:"#fff",cursor:"pointer",fontSize:13,fontWeight:600,fontFamily:"inherit",color:"var(--text)",display:"flex",alignItems:"center",gap:4}}>{city || t("cityLabel")}</button><button onClick={()=>setView("settings")} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"#fff",cursor:"pointer",display:"grid",placeItems:"center",color:"var(--sub)"}}><Ic name="settings" size={16}/></button></div>
+<div style={{display:"flex",gap:8,alignItems:"center"}}><button onClick={()=>setView("saved")} style={{padding:"6px 12px",borderRadius:8,border:"1.5px solid var(--border)",background:"#fff",cursor:"pointer",fontSize:13,fontWeight:600,fontFamily:"inherit",color:"var(--text)",display:"flex",alignItems:"center",gap:6}}><Ic name="heart" size={14} color={saved.length>0?"var(--accent)":"var(--sub)"}/> {saved.length}</button><button onClick={()=>setL(lang==="en"?"mr":"en")} style={{padding:"5px 12px",borderRadius:8,border:"1.5px solid var(--border)",background:lang==="mr"?"var(--accentBg)":"#fff",cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:"inherit",color:lang==="mr"?"var(--accent)":"var(--sub)",display:"flex",alignItems:"center",gap:4}}><Ic name="lang" size={14}/>{lang==="mr"?"मरा":"EN"}</button><button onClick={()=>setView("settings")} style={{padding:"6px 12px",borderRadius:8,border:"1.5px solid var(--border)",background:"#fff",cursor:"pointer",fontSize:13,fontWeight:600,fontFamily:"inherit",color:"var(--text)",display:"flex",alignItems:"center",gap:4}}>{city || t("cityLabel")}</button><button onClick={()=>setView("settings")} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"#fff",cursor:"pointer",display:"grid",placeItems:"center",color:"var(--sub)"}}><Ic name="settings" size={16}/></button></div>
 </nav>
 
 <div style={{maxWidth:920,margin:"0 auto",padding:"0 24px 80px"}}>
 {/* SETTINGS */}
+
+{view==="saved"&&<div className="fade-up" style={{paddingTop:40}}>
+  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24}}><Ic name="heart" size={24} color="var(--accent)"/><h2 style={{fontFamily:"inherit",fontSize:28,fontWeight:400}}>Saved Items</h2></div>
+  {saved.length===0?<div className="card" style={{padding:40,textAlign:"center"}}><div style={{color:"var(--sub)",marginBottom:12}}><Ic name="heart" size={32}/></div><h3 style={{fontSize:16,fontWeight:600,marginBottom:8}}>No saved items</h3><p style={{fontSize:14,color:"var(--sub)"}}>Click the heart icon on any product recommendation to save it here for comparison.</p></div>:
+  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",gap:16}}>
+    {saved.map((r,i)=><div key={i} className="card" style={{padding:20,display:"flex",flexDirection:"column",position:"relative"}}>
+      <div style={{fontSize:12,fontWeight:700,color:"var(--accent)",marginBottom:8}}>{r.badge}</div>
+      <div style={{fontWeight:700,fontSize:16,marginBottom:4,paddingRight:24}}>{r.name}</div>
+      <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>₹{parseInt(r.price.toString().replace(/\D/g,'')||"0").toLocaleString()}</div>
+      <div style={{background:"#f5f5f7",padding:"10px 14px",borderRadius:8,fontSize:12,marginBottom:12}}>
+        {r.specs.slice(0,3).map((s,j)=><div key={j} style={{color:"#48484a",marginBottom:4}}>• {s}</div>)}
+      </div>
+      <button onClick={()=>togS(r)} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",cursor:"pointer",padding:4}}><Ic name="heart" size={18} color="var(--accent)"/></button>
+    </div>)}
+  </div>}
+</div>}
+
 {view==="settings"&&<div className="fade-up" style={{paddingTop:40}}><h2 style={{fontFamily:"inherit",fontSize:28,fontWeight:400,marginBottom:20}}>{t("settings")}</h2><div className="card" style={{padding:24,marginBottom:16}}><label style={{fontWeight:700,fontSize:15,display:"block",marginBottom:4}}>{t("gemKey")}</label><p style={{fontSize:13,color:"var(--sub)",marginBottom:12}}>{t("gemKeyD")}</p><div style={{display:"flex",gap:8}}><input type="password" value={apiKey} onChange={e=>{setApiKey(e.target.value);setApiSaved(false);}} placeholder="AIza..." style={{flex:1,padding:"10px 14px",borderRadius:10,border:"1.5px solid var(--border)",fontSize:14,fontFamily:"'JetBrains Mono'",background:"#f5f5f7"}}/><button className="btn btn-p" onClick={saveK} style={{padding:"10px 20px"}}>{apiSaved?t("saved"):t("save")}</button></div></div><div className="card" style={{padding:24,marginBottom:16}}><label style={{fontWeight:700,fontSize:15,display:"block",marginBottom:4}}>{t("cityLabel")}</label><p style={{fontSize:13,color:"var(--sub)",marginBottom:12}}>{t("cityD")}</p><CI/></div><div className="card" style={{padding:24,marginBottom:16}}><label style={{fontWeight:700,fontSize:15,display:"block",marginBottom:4}}>{t("language")}</label><p style={{fontSize:13,color:"var(--sub)",marginBottom:12}}>{t("langD")}</p><div style={{display:"flex",gap:8}}>{[["en","English"],["mr","मराठी"]].map(([k,l])=><button key={k} className={`pill ${lang===k?"active":""}`} onClick={()=>setL(k)} style={{padding:"10px 20px",fontSize:15}}>{l}</button>)}</div></div><button className="btn btn-s" onClick={()=>setView("home")}><Ic name="back" size={16}/> {t("back")}</button></div>}
 
 {/* HOME */}
@@ -98,7 +116,27 @@ return(
 {view==="result"&&<div ref={rR} className="fade-up" style={{paddingTop:28}}>
 <div style={{display:"flex",gap:8,marginBottom:20}}><button className="btn btn-s" onClick={()=>setView("configure")} style={{fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("adjust")}</button><button className="btn btn-s" onClick={()=>{setView("home");setCatQ("");}} style={{fontSize:13,padding:"8px 16px"}}>{t("newSearch")}</button></div>
 <div style={{fontSize:12,fontWeight:700,color:"var(--accent)",letterSpacing:1,textTransform:"uppercase",marginBottom:12}}>{t("step")} 3 {t("of")} 3</div><div className="card" style={{padding:"14px 20px",marginBottom:20,display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}><Ic name={co?.icon} size={24} color="var(--accent)"/><div style={{flex:1}}><span style={{fontWeight:700,fontSize:15}}>{t(co?.tk)}</span>{sub&&<span style={{color:"var(--sub)",fontSize:14}}> · {sub}</span>}<div style={{fontSize:12,color:"var(--sub)"}}>{city&&`${city} · `}{budget&&`${budget} · `}{hh} {t("members")}</div></div></div>
-<div className="card" style={{padding:"28px 24px",lineHeight:1.7}}>{renderMD(result)}</div>
+{pR&&pR.recs?(
+<div>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",gap:16,marginBottom:24}}>
+    {pR.recs.map((r,i)=><div key={i} className="card" style={{padding:20,display:"flex",flexDirection:"column",position:"relative",transition:"transform 0.2s, box-shadow 0.2s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 12px 32px rgba(0,0,0,0.1)";}} onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none";}}>
+      <div style={{fontSize:12,fontWeight:700,color:"var(--accent)",marginBottom:8}}>{r.badge}</div>
+      <div style={{fontWeight:700,fontSize:16,marginBottom:4,paddingRight:24}}>{r.name}</div>
+      <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>₹{parseInt(r.price.toString().replace(/\D/g,'')||"0").toLocaleString()}</div>
+      <div style={{fontSize:13,color:"var(--sub)",marginBottom:12,flex:1}}>{r.why}</div>
+      <div style={{background:"#f5f5f7",padding:"10px 14px",borderRadius:8,fontSize:12,marginBottom:12}}>
+        {r.specs.slice(0,3).map((s,j)=><div key={j} style={{color:"#48484a",marginBottom:4}}>• {s}</div>)}
+      </div>
+      <div style={{fontSize:12,color:"#dc2626",lineHeight:1.4}}><strong>Cons:</strong> {r.cons}</div>
+      <button onClick={()=>togS(r)} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",cursor:"pointer",padding:4}}><Ic name="heart" size={18} color={saved.find(x=>x.name===r.name)?"var(--accent)":"var(--border)"}/></button>
+    </div>)}
+  </div>
+  <div className="card" style={{padding:24}}>
+    <h3 style={{fontSize:16,fontWeight:700,marginBottom:10}}>Expert Verdict</h3><p style={{fontSize:14,lineHeight:1.6,color:"var(--sub)"}}>{pR.comparison}</p>
+    <h3 style={{fontSize:16,fontWeight:700,marginTop:20,marginBottom:10}}>Buying Advice</h3><ul style={{paddingLeft:20,fontSize:14,lineHeight:1.6,color:"var(--sub)"}}>{pR.advice.map((a,i)=><li key={i} style={{marginBottom:6}}>{a}</li>)}</ul>
+  </div>
+</div>
+):<div className="card" style={{padding:"28px 24px",lineHeight:1.7}}>{renderMD(result)}</div>}
 {/* TERMINOLOGY */}
 {termos.length>0&&<div style={{marginTop:24}}><button onClick={()=>setShowT(!showT)} className="card" style={{width:"100%",padding:"18px 24px",cursor:"pointer",display:"flex",alignItems:"center",gap:12,border:"1.5px solid var(--accent)",background:showT?"var(--accentBg)":"white"}}><Ic name="book" size={22} color="var(--accent)"/><div style={{flex:1,textAlign:"left"}}><div style={{fontWeight:700,fontSize:16,color:"var(--accent)"}}>{t("termoT")}</div><div style={{fontSize:13,color:"var(--sub)"}}>{t("termoSub")}</div></div><div style={{transform:showT?"rotate(90deg)":"rotate(0)",transition:"transform .2s"}}><Ic name="arrow" size={18} color="var(--accent)"/></div></button>
 {showT&&<div style={{marginTop:12,animation:"fadeUp .3s ease"}}>{termos.map((tm,i)=><div key={i} className="termo-card"><div style={{fontWeight:700,fontSize:15,color:"#1d1d1f",marginBottom:4}}>{lang==="mr"?(tm.tm||tm.t):tm.t}</div><div style={{fontSize:14,lineHeight:1.65,color:"#48484a"}}>{lang==="mr"?tm.mr:tm.en}</div></div>)}</div>}</div>}
