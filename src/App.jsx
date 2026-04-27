@@ -15,7 +15,7 @@ const[cat,setCat]=useState(null);const[sub,setSub]=useState("");const[pris,setPr
 const[budget,setBudget]=useState("");const[hh,setHh]=useState("3-4");const[notes,setNotes]=useState("");
 const[apiKey,setApiKey]=useState("");const[apiSaved,setApiSaved]=useState(false);
 const[loading,setLoading]=useState(false);const[result,setResult]=useState("");const[error,setError]=useState("");
-const[catQ,setCatQ]=useState("");const[saved,setSaved]=useState([]);const[labMode,setLabMode]=useState("pc");
+const[catQ,setCatQ]=useState("");const[saved,setSaved]=useState([]);const[compSel,setCompSel]=useState([]);const[labMode,setLabMode]=useState("pc");
 const[pcP,setPcP]=useState({});const[pcB,setPcB]=useState("");const[pcU,setPcU]=useState("");const[labN,setLabN]=useState("");
 const[qS,setQS]=useState(0);const[qA,setQA]=useState([]);
 const[cW,setCW]=useState("");const[cH,setCH]=useState("");const[cR,setCR]=useState("8");
@@ -25,7 +25,7 @@ const rR=useRef(null);
 useEffect(()=>{const k=localStorage.getItem("m_key");if(k){setApiKey(k);setApiSaved(true);}const c=localStorage.getItem("m_city");if(c){setCity(c);setCityQ(c);}const l=localStorage.getItem("m_lang");if(l)setLang(l);const s=localStorage.getItem("m_saved");if(s)setSaved(JSON.parse(s));},[]);
 const saveK=()=>{if(apiKey.trim()){localStorage.setItem("m_key",apiKey.trim());setApiSaved(true);}};
 const selC=(c)=>{setCity(c);setCityQ(c);setShowCD(false);localStorage.setItem("m_city",c);};
-const setL=(l)=>{setLang(l);localStorage.setItem("m_lang",l);};const togS=(r)=>{setSaved(p=>{const isS=p.find(x=>x.name===r.name);const n=isS?p.filter(x=>x.name!==r.name):[...p,r];localStorage.setItem("m_saved",JSON.stringify(n));return n;});};
+const setL=(l)=>{setLang(l);localStorage.setItem("m_lang",l);};const togC=(r)=>setCompSel(p=>p.includes(r)?p.filter(x=>x!==r):p.length<4?[...p,r]:p);const togS=(r)=>{setSaved(p=>{const isS=p.find(x=>x.name===r.name);const n=isS?p.filter(x=>x.name!==r.name):[...p,r];localStorage.setItem("m_saved",JSON.stringify(n));return n;});};
 const togP=(id)=>setPris(p=>p.includes(id)?p.filter(x=>x!==id):p.length<5?[...p,id]:p);
 const co=CATS.find(c=>c.id===cat);const bds=BUD[cat]||BUD.default;
 const fCi=CITIES.filter(c=>c.toLowerCase().includes(cityQ.toLowerCase())).slice(0,6);
@@ -73,10 +73,10 @@ return(
 {/* SETTINGS */}
 
 {view==="saved"&&<div className="fade-up" style={{paddingTop:40}}>
-  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24}}><Ic name="heart" size={24} color="var(--accent)"/><h2 style={{fontFamily:"inherit",fontSize:28,fontWeight:400}}>Saved Items</h2></div>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24}}><div style={{display:"flex",alignItems:"center",gap:10}}><Ic name="heart" size={24} color="var(--accent)"/><h2 style={{fontFamily:"inherit",fontSize:28,fontWeight:400}}>Saved Items</h2></div>{compSel.length>1&&<button className="btn btn-p" onClick={()=>setView("compare")} style={{padding:"8px 16px",fontSize:13}}>Compare {compSel.length} Items</button>}</div>
   {saved.length===0?<div className="card" style={{padding:40,textAlign:"center"}}><div style={{color:"var(--sub)",marginBottom:12}}><Ic name="heart" size={32}/></div><h3 style={{fontSize:16,fontWeight:600,marginBottom:8}}>No saved items</h3><p style={{fontSize:14,color:"var(--sub)"}}>Click the heart icon on any product recommendation to save it here for comparison.</p></div>:
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",gap:16}}>
-    {saved.map((r,i)=><div key={i} className="card" style={{padding:20,display:"flex",flexDirection:"column",position:"relative"}}>
+    {saved.map((r,i)=><div key={i} className="card" style={{padding:20,display:"flex",flexDirection:"column",position:"relative",border:compSel.includes(r)?"2px solid var(--accent)":"1px solid var(--border)",cursor:"pointer"}} onClick={()=>togC(r)}>
       <div style={{fontSize:12,fontWeight:700,color:"var(--accent)",marginBottom:8}}>{r.badge}</div>
       <div style={{fontWeight:700,fontSize:16,marginBottom:4,paddingRight:24}}>{r.name}</div>
       <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>₹{parseInt(r.price.toString().replace(/\D/g,'')||"0").toLocaleString()}</div>
@@ -86,6 +86,28 @@ return(
       <button onClick={()=>togS(r)} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",cursor:"pointer",padding:4}}><Ic name="heart" size={18} color="var(--accent)"/></button>
     </div>)}
   </div>}
+</div>}
+
+
+{view==="compare"&&<div className="fade-up" style={{paddingTop:40}}>
+  <div style={{display:"flex",gap:8,marginBottom:20}}><button className="btn btn-s" onClick={()=>setView("saved")} style={{fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> Back to Saved</button></div>
+  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24}}><Ic name="compare" size={24} color="var(--accent)"/><h2 style={{fontFamily:"inherit",fontSize:28,fontWeight:400}}>Compare Products</h2></div>
+  {compSel.length<2?<div className="card" style={{padding:40,textAlign:"center"}}><div style={{color:"var(--sub)",marginBottom:12}}><Ic name="compare" size={32}/></div><h3 style={{fontSize:16,fontWeight:600,marginBottom:8}}>Select products to compare</h3><p style={{fontSize:14,color:"var(--sub)"}}>Go to your Saved items and click on at least 2 products to compare them side-by-side.</p><button className="btn btn-p" onClick={()=>setView("saved")} style={{marginTop:20}}>Go to Saved</button></div>:
+  <div style={{overflowX:"auto"}}><table style={{width:"100%",minWidth:600,borderCollapse:"collapse",background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 12px rgba(0,0,0,0.04)"}}>
+    <thead>
+      <tr>
+        <th style={{padding:"16px",borderBottom:"2px solid var(--border)",background:"#f5f5f7",textAlign:"left",width:120}}>Feature</th>
+        {compSel.map((r,i)=><th key={i} style={{padding:"16px",borderBottom:"2px solid var(--border)",background:"#f5f5f7",textAlign:"left",minWidth:200}}>{r.name}</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Price</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:18,fontWeight:800}}>₹{parseInt(r.price.toString().replace(/\D/g,'')||"0").toLocaleString()}</td>)}</tr>
+      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Badge</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",color:"var(--accent)",fontWeight:600}}>{r.badge}</td>)}</tr>
+      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Specs</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:13,lineHeight:1.6}}>{r.specs.map((s,j)=><div key={j}>• {s}</div>)}</td>)}</tr>
+      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Why Buy</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:13,lineHeight:1.6}}>{r.why}</td>)}</tr>
+      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Cons</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:13,lineHeight:1.6,color:"#dc2626"}}>{r.cons}</td>)}</tr>
+    </tbody>
+  </table></div>}
 </div>}
 
 {view==="settings"&&<div className="fade-up" style={{paddingTop:40}}><h2 style={{fontFamily:"inherit",fontSize:28,fontWeight:400,marginBottom:20}}>{t("settings")}</h2><div className="card" style={{padding:24,marginBottom:16}}><label style={{fontWeight:700,fontSize:15,display:"block",marginBottom:4}}>{t("gemKey")}</label><p style={{fontSize:13,color:"var(--sub)",marginBottom:12}}>{t("gemKeyD")}</p><div style={{display:"flex",gap:8}}><input type="password" value={apiKey} onChange={e=>{setApiKey(e.target.value);setApiSaved(false);}} placeholder="AIza..." style={{flex:1,padding:"10px 14px",borderRadius:10,border:"1.5px solid var(--border)",fontSize:14,fontFamily:"'JetBrains Mono'",background:"#f5f5f7"}}/><button className="btn btn-p" onClick={saveK} style={{padding:"10px 20px"}}>{apiSaved?t("saved"):t("save")}</button></div></div><div className="card" style={{padding:24,marginBottom:16}}><label style={{fontWeight:700,fontSize:15,display:"block",marginBottom:4}}>{t("cityLabel")}</label><p style={{fontSize:13,color:"var(--sub)",marginBottom:12}}>{t("cityD")}</p><CI/></div><div className="card" style={{padding:24,marginBottom:16}}><label style={{fontWeight:700,fontSize:15,display:"block",marginBottom:4}}>{t("language")}</label><p style={{fontSize:13,color:"var(--sub)",marginBottom:12}}>{t("langD")}</p><div style={{display:"flex",gap:8}}>{[["en","English"],["mr","मराठी"]].map(([k,l])=><button key={k} className={`pill ${lang===k?"active":""}`} onClick={()=>setL(k)} style={{padding:"10px 20px",fontSize:15}}>{l}</button>)}</div></div><button className="btn btn-s" onClick={()=>setView("home")}><Ic name="back" size={16}/> {t("back")}</button></div>}
@@ -160,7 +182,7 @@ return(
 {view==="labResult"&&<div ref={rR} className="fade-up dark" style={{margin:"0 -24px",padding:"28px 24px 48px",minHeight:"80vh"}}><div style={{display:"flex",gap:8,marginBottom:20}}><button className="btn btn-s" onClick={()=>setView("labConfig")} style={{fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("adjust")}</button><button className="btn btn-s" onClick={()=>setView("lab")} style={{fontSize:13,padding:"8px 16px"}}>{t("labHome")}</button></div><div className="card" style={{padding:"28px 24px",lineHeight:1.7}}><div style={{color:"#f5f5f7"}}>{renderMD(result)}</div></div><p style={{textAlign:"center",color:"var(--darkSub)",fontSize:12,padding:"24px 0"}}>{t("labDisc")}</p></div>}
 
 {/* TOOLS */}
-{view==="tools"&&<div className="fade-up" style={{paddingTop:40}}><h2 style={{fontFamily:"inherit",fontSize:28,fontWeight:400,marginBottom:8}}>{t("toolsT")}</h2><p style={{fontSize:16,color:"var(--sub)",marginBottom:28}}>{t("toolsSub")}</p><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>{[{i:"quiz",n:t("hmdT"),d:t("hmdD"),a:()=>{setView("quiz");setQS(0);setQA([]);setResult("");setError("");}},{i:"calc",n:t("elCalc"),d:t("elCalcD"),a:()=>{setView("calc");setCW("");setCH("");}},{i:"deal",n:t("dealC"),d:t("dealCD"),a:()=>{setView("dealCheck");setDP("");setDPr("");setResult("");setError("");}},{i:"compare",n:t("compP"),d:t("compPD"),a:null}].map(x=><div key={x.n} className="card" onClick={x.a||undefined} style={{padding:22,cursor:x.a?"pointer":"default",opacity:x.a?1:.5}}><div style={{color:"var(--accent)",marginBottom:10}}><Ic name={x.i} size={24}/></div><div style={{fontWeight:700,fontSize:15,marginBottom:4}}>{x.n}</div><div style={{fontSize:13,color:"var(--sub)",lineHeight:1.5}}>{x.d}</div></div>)}</div></div>}
+{view==="tools"&&<div className="fade-up" style={{paddingTop:40}}><h2 style={{fontFamily:"inherit",fontSize:28,fontWeight:400,marginBottom:8}}>{t("toolsT")}</h2><p style={{fontSize:16,color:"var(--sub)",marginBottom:28}}>{t("toolsSub")}</p><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>{[{i:"quiz",n:t("hmdT"),d:t("hmdD"),a:()=>{setView("quiz");setQS(0);setQA([]);setResult("");setError("");}},{i:"calc",n:t("elCalc"),d:t("elCalcD"),a:()=>{setView("calc");setCW("");setCH("");}},{i:"deal",n:t("dealC"),d:t("dealCD"),a:()=>{setView("dealCheck");setDP("");setDPr("");setResult("");setError("");}},{i:"compare",n:t("compP"),d:t("compPD"),a:()=>{setView("compare");setCompSel([]);}}].map(x=><div key={x.n} className="card" onClick={x.a||undefined} style={{padding:22,cursor:x.a?"pointer":"default",opacity:x.a?1:.5}}><div style={{color:"var(--accent)",marginBottom:10}}><Ic name={x.i} size={24}/></div><div style={{fontWeight:700,fontSize:15,marginBottom:4}}>{x.n}</div><div style={{fontSize:13,color:"var(--sub)",lineHeight:1.5}}>{x.d}</div></div>)}</div></div>}
 
 {/* QUIZ */}
 {view==="quiz"&&<div className="fade-up" style={{paddingTop:40}}><button className="btn btn-s" onClick={()=>setView("tools")} style={{marginBottom:20,fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("tools")}</button><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}><Ic name="quiz" size={24} color="var(--accent)"/><h2 style={{fontFamily:"inherit",fontSize:26,fontWeight:400}}>{t("hmdT")}</h2></div><p style={{color:"var(--sub)",fontSize:14,marginBottom:24}}>{t("question")} {qS+1} {t("of")} {quizQs.length}</p><div style={{height:3,background:"#e5e5ea",borderRadius:2,marginBottom:28}}><div style={{height:"100%",background:"var(--accent)",borderRadius:2,width:`${((qS+1)/quizQs.length)*100}%`,transition:"width .3s"}}/></div>
