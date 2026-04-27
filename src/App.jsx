@@ -48,15 +48,7 @@ const renderMD = (md) => {
   });
 };
 
-/* ─── Trending data ────────────────────────────── */
-const TRENDING = [
-  { cat: 'ac',     icon: 'ac',      tag: '☀️ Summer',   label: 'Split ACs',          desc: 'Beat the heat. Top inverter picks with 5-star BEE rating under ₹45K.' },
-  { cat: 'phone',  icon: 'phone',   tag: '📱 Hot',       label: 'Smartphones',        desc: 'Best cameras under ₹20K — the 2025 mid-range kings.' },
-  { cat: 'laptop', icon: 'laptop',  tag: '💼 Work',      label: 'Laptops',            desc: 'Ultrabooks with all-day battery for work & study.' },
-  { cat: 'fridge', icon: 'fridge',  tag: '⭐ BEE 5★',  label: 'Refrigerators',      desc: '5-star inverter compressors. Save ₹4,000/year on electricity.' },
-  { cat: 'tv',     icon: 'tv',      tag: '🎬 Premium',   label: 'Smart TVs',          desc: 'OLED vs QLED — which is worth it for Indian living rooms?' },
-  { cat: 'washer', icon: 'washer',  tag: '💧 Popular',   label: 'Washing Machines',   desc: 'Front load vs top load. Best picks under ₹30K.' },
-];
+
 
 /* ─── Main App ──────────────────────────────────── */
 export default function App() {
@@ -231,6 +223,16 @@ Respond ONLY with valid JSON — no markdown, no code fences:
 
   /* ─── Watt presets ─────────────────────────── */
   const wts = [[t('wCeil'), '75'], [t('wTv'), '80'], [t('wFr'), '150'], [t('wAc1'), '1000'], [t('wAc15'), '1500'], [t('wGey'), '2000'], [t('wWash'), '500'], [t('wMic'), '1200']];
+
+  /* ─── Trending (reactive to lang) ────────────── */
+  const TRENDING = [
+    { cat:'ac',     icon:'ac',     tag:t('trend_ac_tag'), label:t('trend_ac_label'), desc:t('trend_ac_desc') },
+    { cat:'phone',  icon:'phone',  tag:t('trend_ph_tag'), label:t('trend_ph_label'), desc:t('trend_ph_desc') },
+    { cat:'laptop', icon:'laptop', tag:t('trend_la_tag'), label:t('trend_la_label'), desc:t('trend_la_desc') },
+    { cat:'fridge', icon:'fridge', tag:t('trend_fr_tag'), label:t('trend_fr_label'), desc:t('trend_fr_desc') },
+    { cat:'tv',     icon:'tv',     tag:t('trend_tv_tag'), label:t('trend_tv_label'), desc:t('trend_tv_desc') },
+    { cat:'washer', icon:'washer', tag:t('trend_wa_tag'), label:t('trend_wa_label'), desc:t('trend_wa_desc') },
+  ];
 
   /* ─── Parse JSON result ────────────────────── */
   let pR = null;
@@ -472,7 +474,7 @@ Respond ONLY with valid JSON — no markdown, no code fences:
                     {t('helpDecide')} →
                   </button>
                   <button className="btn btn-s" onClick={() => setView('browse')} style={{ fontSize: 15, padding: '16px 28px', borderRadius: 100 }}>
-                    Browse all →
+                    {t('browseAllCta')}
                   </button>
                 </div>
               </div>
@@ -493,7 +495,7 @@ Respond ONLY with valid JSON — no markdown, no code fences:
             <div style={{ marginBottom: 44 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
                 <span style={{ fontSize: 24 }}>🔥</span>
-                <h2 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5 }}>Trending This Season</h2>
+                <h2 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5 }}>{t('trendTitle')}</h2>
               </div>
               <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
                 {TRENDING.map((item, i) => (
@@ -513,7 +515,7 @@ Respond ONLY with valid JSON — no markdown, no code fences:
 
             {/* Quick tools strip */}
             <div style={{ marginBottom: 44 }}>
-              <h2 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5, marginBottom: 16 }}>Quick Tools</h2>
+              <h2 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5, marginBottom: 16 }}>{t('quickTools')}</h2>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {[
                   { i: 'quiz', l: t('helpDecide'), a: () => { setView('quiz'); setQS(0); setQA([]); } },
@@ -673,115 +675,169 @@ Respond ONLY with valid JSON — no markdown, no code fences:
               </div>
             </div>
 
-            {/* ── Product tile modal ──────────── */}
+            {/* ── Product tile modal ─────────────────────────────────── */}
             {activeTile && (
-              <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(236,230,220,0.75)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, overflowY: 'auto' }}
-                onClick={() => setActiveTile(null)}>
-                <div className="card nm-large" onClick={e => e.stopPropagation()}
-                  style={{ width: '100%', maxWidth: 660, padding: '40px 44px', position: 'relative', animation: 'fadeUp 0.3s ease', maxHeight: '92vh', overflowY: 'auto' }}>
-                  
-                  {/* Close */}
-                  <button onClick={() => setActiveTile(null)} style={{ position: 'absolute', top: 22, right: 22, background: 'var(--bg)', border: 'none', borderRadius: '50%', width: 38, height: 38, display: 'grid', placeItems: 'center', cursor: 'pointer', boxShadow: 'var(--nm-sm)' }}>
-                    <Ic name="close" size={17} />
-                  </button>
-
-                  {/* Header */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 24 }}>
+              <div
+                onClick={() => setActiveTile(null)}
+                style={{
+                  position: 'fixed', inset: 0, zIndex: 999,
+                  /* Dark warm overlay — eliminates ghost card shadows completely */
+                  background: 'rgba(12, 7, 2, 0.72)',
+                  backdropFilter: 'blur(14px)',
+                  WebkitBackdropFilter: 'blur(14px)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: 20,
+                }}
+              >
+                <div
+                  className="card"
+                  onClick={e => e.stopPropagation()}
+                  style={{
+                    width: '100%', maxWidth: 700,
+                    overflow: 'hidden', /* NO scroll — all content fits */
+                    animation: 'fadeUp .25s cubic-bezier(.22,1,.36,1)',
+                    position: 'relative',
+                    display: 'flex', flexDirection: 'column',
+                  }}
+                >
+                  {/* ── Header row ───────────────────────────────────── */}
+                  <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid rgba(0,0,0,0.07)', display: 'flex', alignItems: 'flex-start', gap: 14 }}>
                     {activeTile.brand_domain && (
-                      <img src={`https://logo.clearbit.com/${activeTile.brand_domain}`} alt="logo"
-                        style={{ width: 52, height: 52, objectFit: 'contain', borderRadius: 12, boxShadow: 'var(--nm-sm)', background: '#fff', padding: 6 }}
-                        onError={e => { e.target.style.display = 'none'; }} />
+                      <img
+                        src={`https://logo.clearbit.com/${activeTile.brand_domain}`}
+                        alt="brand"
+                        style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'contain', background: '#fff', padding: 5, boxShadow: 'var(--nm-sm)', flexShrink: 0 }}
+                        onError={e => { e.target.style.display = 'none'; }}
+                      />
                     )}
-                    <div style={{ flex: 1, paddingRight: 40 }}>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, color: 'var(--accent)', background: 'var(--accentBg)', padding: '4px 12px', borderRadius: 100, marginBottom: 10 }}>
-                        {activeTile.badge}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--accent)', background: 'var(--accentBg)', padding: '3px 10px', borderRadius: 100 }}>
+                          {activeTile.badge}
+                        </span>
+                        {activeTile.buy && (
+                          <span style={{ fontSize: 11.5, color: 'var(--sub)', fontWeight: 500 }}>🛒 {activeTile.buy}</span>
+                        )}
                       </div>
-                      <h2 style={{ fontSize: 26, fontWeight: 800, lineHeight: 1.2 }}>{activeTile.name}</h2>
+                      <h2 style={{ fontSize: 19, fontWeight: 800, lineHeight: 1.2, marginBottom: 4 }}>{activeTile.name}</h2>
+                      <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, background: 'linear-gradient(135deg,#d97706,#b45309)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                        ₹{parseInt(activeTile.price.toString().replace(/\D/g, '') || '0').toLocaleString()}
+                      </div>
                     </div>
+                    <button
+                      onClick={() => setActiveTile(null)}
+                      style={{ background: 'var(--bg)', border: 'none', borderRadius: 10, width: 34, height: 34, display: 'grid', placeItems: 'center', cursor: 'pointer', boxShadow: 'var(--nm-sm)', flexShrink: 0, marginTop: 2 }}
+                    >
+                      <Ic name="close" size={15} />
+                    </button>
                   </div>
 
-                  {/* Price */}
-                  <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 6, background: 'linear-gradient(135deg,#d97706,#b45309)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                    ₹{parseInt(activeTile.price.toString().replace(/\D/g, '') || '0').toLocaleString()}
-                  </div>
+                  {/* ── Two-column body ──────────────────────────────── */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
 
-                  {/* Summary */}
-                  <p style={{ fontSize: 15, color: 'var(--sub)', lineHeight: 1.7, marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-                    {activeTile.summary || activeTile.why}
-                  </p>
+                    {/* Left: summary + target + pros + cons */}
+                    <div style={{ padding: '16px 18px 16px 24px', borderRight: '1px solid rgba(0,0,0,0.07)' }}>
+                      {/* Summary */}
+                      <p style={{ fontSize: 12.5, color: 'var(--sub)', lineHeight: 1.6, marginBottom: 10 }}>
+                        {activeTile.summary || activeTile.why}
+                      </p>
 
-                  {/* Target */}
-                  {activeTile.target && (
-                    <div style={{ background: 'var(--accentBg)', padding: '14px 18px', borderRadius: 14, marginBottom: 24, fontSize: 14, lineHeight: 1.55, boxShadow: 'var(--nm-sm)' }}>
-                      <strong>🎯 Who is this for?</strong><br />
-                      <span style={{ color: 'var(--sub)' }}>{activeTile.target}</span>
-                    </div>
-                  )}
-
-                  {/* Specs grid */}
-                  <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 14 }}>Specifications</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 28 }}>
-                    {(Array.isArray(activeTile.specs)
-                      ? activeTile.specs
-                      : Object.entries(activeTile.specs || {}).map(([k, v]) => `${k}: ${v}`)
-                    ).map((s, i) => {
-                      const [label, ...rest] = s.split(':');
-                      return (
-                        <div key={i} style={{ background: 'var(--bg)', padding: '12px 16px', borderRadius: 12, boxShadow: 'var(--nm-sm)' }}>
-                          {rest.length > 0
-                            ? <><div style={{ fontSize: 11, color: 'var(--sub)', fontWeight: 700, marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label.trim()}</div><div style={{ fontSize: 14, fontWeight: 700 }}>{rest.join(':').trim()}</div></>
-                            : <div style={{ fontSize: 13, fontWeight: 600 }}>{s}</div>
-                          }
+                      {/* Target */}
+                      {activeTile.target && (
+                        <div style={{ fontSize: 12, color: 'var(--sub)', marginBottom: 12, padding: '7px 11px', background: 'var(--accentBg)', borderRadius: 8, lineHeight: 1.5 }}>
+                          <strong style={{ color: 'var(--accent)' }}>🎯 </strong>{activeTile.target}
                         </div>
-                      );
-                    })}
+                      )}
+
+                      {/* Divider label */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        {/* Pros */}
+                        <div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: '#16a34a', letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 7 }}>Pros</div>
+                          {(activeTile.pros || []).slice(0, 3).map((p, i) => (
+                            <div key={i} style={{ display: 'flex', gap: 6, fontSize: 12, color: 'var(--sub)', marginBottom: 6, lineHeight: 1.4 }}>
+                              <span style={{ color: '#16a34a', flexShrink: 0, marginTop: 1 }}>✓</span>
+                              <span>{p}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Cons */}
+                        <div>
+                          <div style={{ fontSize: 11, fontWeight: 800, color: '#dc2626', letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 7 }}>Cons</div>
+                          {(Array.isArray(activeTile.cons) ? activeTile.cons : [activeTile.cons]).slice(0, 3).map((c, i) => (
+                            <div key={i} style={{ display: 'flex', gap: 6, fontSize: 12, color: 'var(--sub)', marginBottom: 6, lineHeight: 1.4 }}>
+                              <span style={{ color: '#dc2626', flexShrink: 0, marginTop: 1 }}>✗</span>
+                              <span>{c}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right: specs + insider tip */}
+                    <div style={{ padding: '16px 24px 16px 18px' }}>
+                      <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--sub)', letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 10 }}>Specifications</div>
+                      <div>
+                        {(Array.isArray(activeTile.specs)
+                          ? activeTile.specs
+                          : Object.entries(activeTile.specs || {}).map(([k, v]) => `${k}: ${v}`)
+                        ).slice(0, 5).map((s, i) => {
+                          const colonIdx = s.indexOf(':');
+                          const label = colonIdx > -1 ? s.slice(0, colonIdx).trim() : `Spec ${i + 1}`;
+                          const value = colonIdx > -1 ? s.slice(colonIdx + 1).trim() : s;
+                          return (
+                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '7px 0', borderBottom: i < 4 ? '1px solid rgba(0,0,0,0.05)' : 'none', gap: 8 }}>
+                              <span style={{ fontSize: 11.5, color: 'var(--sub)', fontWeight: 600, flexShrink: 0 }}>{label}</span>
+                              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', textAlign: 'right' }}>{value}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Insider tip (from pR.insider if available) */}
+                      {pR?.insider && (
+                        <div style={{ marginTop: 14, padding: '9px 12px', background: 'var(--accentBg)', borderRadius: 8, fontSize: 11.5, color: 'var(--sub)', lineHeight: 1.55, borderLeft: '3px solid var(--accent)' }}>
+                          <strong style={{ color: 'var(--accent)' }}>💡 Insider: </strong>{pR.insider}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Pros / Cons */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 28 }}>
-                    <div>
-                      <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 12, color: '#16a34a' }}>✓ Pros</h3>
-                      {(activeTile.pros || []).map((p, i) => (
-                        <div key={i} style={{ display: 'flex', gap: 8, fontSize: 14, color: 'var(--sub)', marginBottom: 10, lineHeight: 1.5 }}>
-                          <Ic name="check" size={15} color="#16a34a" /><span>{p}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div>
-                      <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 12, color: '#dc2626' }}>✗ Cons</h3>
-                      {(Array.isArray(activeTile.cons) ? activeTile.cons : [activeTile.cons]).map((c, i) => (
-                        <div key={i} style={{ display: 'flex', gap: 8, fontSize: 14, color: 'var(--sub)', marginBottom: 10, lineHeight: 1.5 }}>
-                          <Ic name="close" size={15} color="#dc2626" /><span>{c}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Buy + Actions */}
-                  {activeTile.buy && (
-                    <div style={{ fontSize: 13, color: 'var(--sub)', marginBottom: 20, padding: '12px 16px', background: 'var(--bg)', borderRadius: 12, boxShadow: 'var(--nm-sm)' }}>
-                      🛒 <strong>Best from:</strong> {activeTile.buy}
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <button className="btn btn-p" onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(activeTile.name + ' buy india price')}`,'_blank')} style={{ flex: 1, justifyContent: 'center', padding: '14px' }}>
+                  {/* ── Action bar ───────────────────────────────────── */}
+                  <div style={{ padding: '14px 24px', borderTop: '1px solid rgba(0,0,0,0.07)', display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <button
+                      className="btn btn-p"
+                      onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(activeTile.name + ' buy india price')}`, '_blank')}
+                      style={{ flex: 1, justifyContent: 'center', padding: '12px', fontSize: 13 }}
+                    >
                       Search Prices
                     </button>
-                    <button className="btn btn-s" onClick={() => window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(activeTile.name)}`,'_blank')} style={{ flex: 1, justifyContent: 'center', padding: '14px' }}>
-                      <Ic name="camera" size={16} /> View Photos
+                    <button
+                      className="btn btn-s"
+                      onClick={() => window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(activeTile.name)}`, '_blank')}
+                      style={{ padding: '12px 16px', fontSize: 13 }}
+                    >
+                      <Ic name="camera" size={15} /> Photos
                     </button>
-                    <button className="btn btn-s" onClick={() => togS(activeTile)}
-                      style={{ width: 52, padding: 0, display: 'grid', placeItems: 'center', background: saved.find(x => x.name === activeTile.name) ? 'var(--accentBg)' : 'var(--bg)' }}>
-                      <Ic name="heart" size={20} color={saved.find(x => x.name === activeTile.name) ? 'var(--accent)' : 'var(--sub)'} />
+                    <button
+                      className="btn btn-s"
+                      onClick={() => togS(activeTile)}
+                      style={{
+                        width: 44, height: 44, padding: 0, display: 'grid', placeItems: 'center',
+                        background: saved.find(x => x.name === activeTile.name) ? 'var(--accentBg)' : 'var(--bg)',
+                      }}
+                    >
+                      <Ic name="heart" size={18} color={saved.find(x => x.name === activeTile.name) ? 'var(--accent)' : 'var(--sub)'} />
                     </button>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Cards grid */}
+            {/* Cards grid — pointer-events off when modal is open prevents ghost hover artifacts */}
             {pR && pR.recs ? (
-              <div>
+              <div style={{ pointerEvents: activeTile ? 'none' : 'auto' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(272px,1fr))', gap: 16, marginBottom: 24 }}>
                   {pR.recs.map((r, i) => (
                     <div key={i} className="card"
