@@ -1,0 +1,450 @@
+
+
+=================================================================
+File: README.md
+=================================================================
+
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+
+=================================================================
+File: combine_code.js
+=================================================================
+
+import fs from 'fs';
+import path from 'path';
+
+const IGNORE_DIRS = ['node_modules', '.git', 'dist', '.github'];
+const ALLOWED_EXTS = ['.js', '.jsx', '.css', '.html', '.md', '.json'];
+
+let result = '';
+
+function walk(dir) {
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    if (IGNORE_DIRS.includes(file)) continue;
+    
+    const fullPath = path.join(dir, file);
+    const stat = fs.statSync(fullPath);
+    
+    if (stat.isDirectory()) {
+      walk(fullPath);
+    } else {
+      if (ALLOWED_EXTS.includes(path.extname(fullPath))) {
+        if (file === 'package-lock.json') continue;
+        
+        result += `\n\n=================================================================\n`;
+        result += `File: ${fullPath.replace(process.cwd() + '/', '')}\n`;
+        result += `=================================================================\n\n`;
+        result += fs.readFileSync(fullPath, 'utf8');
+      }
+    }
+  }
+}
+
+walk(process.cwd());
+fs.writeFileSync('notebooklm-source.txt', result);
+console.log('Successfully created notebooklm-source.txt!');
+
+
+=================================================================
+File: eslint.config.js
+=================================================================
+
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      globals: globals.browser,
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+  },
+])
+
+
+=================================================================
+File: index.html
+=================================================================
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Merit — AI Tech Advisor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
+
+=================================================================
+File: package.json
+=================================================================
+
+{
+  "name": "merit-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^10.2.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.5.0",
+    "vite": "^8.0.10"
+  }
+}
+
+
+=================================================================
+File: src/App.jsx
+=================================================================
+
+import React, { useState, useEffect, useRef } from 'react';
+import { T } from './data/i18n';
+import { TERMO } from './data/terminology';
+import { CATS, PRIS, BUD, CITIES, PCP } from './data/constants';
+import { Ic } from './components/Icons';
+import './index.css';
+
+const renderMD=(md)=>{if(!md)return null;return md.split("\n").map((line,i)=>{const t=line.trim();if(!t)return <div key={i} style={{height:8}}/>;if(t.startsWith("### "))return <h3 key={i} style={{fontSize:17,fontWeight:700,color:"#1d1d1f",margin:"20px 0 8px",paddingBottom:6,borderBottom:"1px solid #e5e5ea"}}>{t.slice(4).replace(/\*\*/g,"")}</h3>;if(t.startsWith("## "))return <h2 key={i} style={{fontSize:21,fontWeight:700,color:"#0071e3",margin:"28px 0 10px",fontFamily:"'Instrument Serif',serif"}}>{t.slice(3).replace(/\*\*/g,"")}</h2>;if(t.startsWith("# "))return <h1 key={i} style={{fontSize:26,fontWeight:700,margin:"20px 0 10px",fontFamily:"'Instrument Serif',serif"}}>{t.slice(2).replace(/\*\*/g,"")}</h1>;if(t.startsWith("- ")||t.startsWith("* ")){const c=t.replace(/^[-*]\s*/,""),p=c.split(/\*\*(.*?)\*\*/g);return <div key={i} style={{display:"flex",gap:8,marginBottom:5,paddingLeft:4,fontSize:14.5,lineHeight:1.65,color:"#48484a"}}><span style={{color:"#86868b"}}>·</span><span>{p.map((x,j)=>j%2===1?<strong key={j} style={{color:"#1d1d1f"}}>{x}</strong>:x)}</span></div>;}if(t.startsWith("|"))return <div key={i} style={{fontFamily:"'JetBrains Mono'",fontSize:12.5,color:"#48484a",padding:"3px 0",borderBottom:t.includes("---")?"2px solid #d2d2d7":"1px solid #e5e5ea",whiteSpace:"pre",overflowX:"auto"}}>{t}</div>;const p=t.split(/\*\*(.*?)\*\*/g);return <p key={i} style={{fontSize:14.5,lineHeight:1.7,color:"#48484a",margin:"3px 0"}}>{p.map((x,j)=>j%2===1?<strong key={j} style={{color:"#1d1d1f"}}>{x}</strong>:x)}</p>;});};
+
+export default function App(){
+const[lang,setLang]=useState("en");const t=(k)=>T[lang]?.[k]||T.en[k]||k;
+const[view,setView]=useState("home");
+const[city,setCity]=useState("");const[cityQ,setCityQ]=useState("");const[showCD,setShowCD]=useState(false);
+const[cat,setCat]=useState(null);const[sub,setSub]=useState("");const[pris,setPris]=useState([]);
+const[budget,setBudget]=useState("");const[hh,setHh]=useState("3-4");const[notes,setNotes]=useState("");
+const[apiKey,setApiKey]=useState("");const[apiSaved,setApiSaved]=useState(false);
+const[loading,setLoading]=useState(false);const[result,setResult]=useState("");const[error,setError]=useState("");
+const[catQ,setCatQ]=useState("");const[labMode,setLabMode]=useState("pc");
+const[pcP,setPcP]=useState({});const[pcB,setPcB]=useState("");const[pcU,setPcU]=useState("");const[labN,setLabN]=useState("");
+const[qS,setQS]=useState(0);const[qA,setQA]=useState([]);
+const[cW,setCW]=useState("");const[cH,setCH]=useState("");const[cR,setCR]=useState("8");
+const[dP,setDP]=useState("");const[dPr,setDPr]=useState("");const[showT,setShowT]=useState(false);
+const rR=useRef(null);
+
+useEffect(()=>{const k=localStorage.getItem("m_key");if(k){setApiKey(k);setApiSaved(true);}const c=localStorage.getItem("m_city");if(c){setCity(c);setCityQ(c);}const l=localStorage.getItem("m_lang");if(l)setLang(l);},[]);
+const saveK=()=>{if(apiKey.trim()){localStorage.setItem("m_key",apiKey.trim());setApiSaved(true);}};
+const selC=(c)=>{setCity(c);setCityQ(c);setShowCD(false);localStorage.setItem("m_city",c);};
+const setL=(l)=>{setLang(l);localStorage.setItem("m_lang",l);};
+const togP=(id)=>setPris(p=>p.includes(id)?p.filter(x=>x!==id):p.length<5?[...p,id]:p);
+const co=CATS.find(c=>c.id===cat);const bds=BUD[cat]||BUD.default;
+const fCi=CITIES.filter(c=>c.toLowerCase().includes(cityQ.toLowerCase())).slice(0,6);
+const fCa=CATS.filter(c=>(T[lang]?.[c.tk]||"").toLowerCase().includes(catQ.toLowerCase())||c.sub.some(s=>s.toLowerCase().includes(catQ.toLowerCase())));
+const langI=lang==="mr"?"\n\nIMPORTANT: Respond ENTIRELY in Marathi (मराठी). Use Devanagari script. Keep product names, brand names, model numbers in English. All explanations in Marathi. Use simple Marathi a 60-year-old parent can understand.":"";
+
+const callAI=async(prompt)=>{if(!apiKey){setError(lang==="mr"?"कृपया सेटिंग्जमध्ये Gemini API की सेट करा.":"Set your Gemini API key in settings.");return;}setLoading(true);setError("");setResult("");try{const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt+langI}]}],generationConfig:{temperature:0.7,maxOutputTokens:5000}})});if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`Error ${r.status}`);}const d=await r.json();const tx=d?.candidates?.[0]?.content?.parts?.[0]?.text;if(!tx)throw new Error("Empty response");setResult(tx);}catch(e){setError(e.message);}finally{setLoading(false);}};
+
+const getRec=()=>{const pl=pris.map((p,i)=>`${i+1}. ${t(PRIS.find(o=>o.id===p)?.l)}`).join(", ");callAI(`You are merit. — India's most trusted, unbiased home tech advisor.\n\n**Request:** Best ${sub||""} ${t(co?.tk)} recommendation\n**City:** ${city||"Not specified"} | **Household:** ${hh} members | **Budget:** ${budget||"Flexible"}\n**Priorities:** ${pl||"None"}\n**Notes:** ${notes||"None"}\n\nRespond:\n## Top 3 Recommendations\nFor each: ### [Rank]. [Model] — ₹[Price]\n- **Why:** match priorities\n- **Key Specs:** 5 specs\n- **Best For:** ideal user\n- **Honest Con:** 1 limitation\n- **Buy From:** best platform\n\n## Quick Comparison\nCompare using ★ 1-5\n\n## Expert Verdict\n3-4 sentences\n\n## After-Purchase Checklist\n4 items\n\n## What Dealers Hide\n3 insider facts\n\nRules: Current 2025-2026 India products. Specific models. Simple language.`).then(()=>{setView("result");setTimeout(()=>rR.current?.scrollIntoView({behavior:"smooth"}),100);});};
+
+const getLabR=()=>{const ps=Object.entries(pcP).filter(([,v])=>v).map(([k,v])=>`${PCP.find(p=>p.id===k)?.n}: ${v}`).join("\n");const pr=labMode==="pc"?`PC Build advisor. Budget: ${pcB||"Flexible"}, Use: ${pcU||"General"}\nParts:\n${ps||"None"}\nNotes: ${labN||"None"}\n\nProvide: Build Analysis, Recommended Build (₹ prices), Compatibility Check, Performance Estimates, Upgrade Path, Where to Buy, Pro Tips`:labMode==="setup"?`Gaming setup advisor. Budget: ${pcB||"Flexible"}, Use: ${pcU||"General"}\nNotes: ${labN||"None"}\n\nRecommend complete setup with ₹ prices.`:`Home theater advisor. Budget: ${pcB||"Flexible"}, Room: ${labN||"Not specified"}\n\nRecommend TV/audio/streaming with ₹ prices.`;callAI(`You are merit. Lab — advanced advisor. Do DEEP research.\n\n${pr}`).then(()=>{setView("labResult");setTimeout(()=>rR.current?.scrollIntoView({behavior:"smooth"}),100);});};
+
+const runQ=()=>{callAI(`You are merit. Quiz results:\n1. Problem: ${qA[0]||"?"}\n2. For: ${qA[1]||"?"}\n3. Priority: ${qA[2]||"?"}\n4. Budget: ${qA[3]||"?"}\nCity: ${city||"?"}\n\nRespond:\n## You Need: [Category]\n## Top 3 Picks (model, ₹, why, con)\n## Why Not [Alternative]\n## Next Steps`).then(()=>setView("quizResult"));};
+const chkD=()=>{callAI(`Deal check: ${dP} at ₹${dPr}, City: ${city||"?"}\n\n## Verdict: [GREAT/FAIR/OVERPRICED/RED FLAG]\n## Price Analysis\n## Red Flags\n## Counter-Offer Script\n## Better Alternatives`).then(()=>setView("dealResult"));};
+
+const mC=cW&&cH?((parseFloat(cW)*parseFloat(cH)*30)/1000*parseFloat(cR||8)).toFixed(0):null;
+const termos=TERMO[cat]||TERMO.default||[];
+const isH=["home","browse","configure","result"].includes(view),isLa=["lab","labConfig","labResult"].includes(view),isTo=["tools","quiz","quizResult","calc","dealCheck","dealResult"].includes(view);
+
+const scamEN={ac:["Check BEE star rating label physically.","Inverter ACs save 30-50% electricity.","Copper coils outlast aluminium.","Don't pay extra for included installation.","1-ton covers ~120 sq ft."],fridge:["300L+ overkill for 4 people.","Inverter compressors worth it — run 24/7.","Check usable, not gross capacity."],phone:["Sensor size > megapixels.","Check OS update years.","Processor > RAM amount.","Online 10-20% below MRP."]};
+const scamMR={ac:["BEE स्टार रेटिंग प्रत्यक्ष तपासा.","इन्व्हर्टर AC ३०-५०% वीज वाचवतो.","कॉपर कॉइल ॲल्युमिनियमपेक्षा चांगले.","समाविष्ट इन्स्टॉलेशनसाठी अतिरिक्त पैसे नको.","१-टन ~१२० चौ.फू. कव्हर करतो."],fridge:["४ जणांसाठी ३००L+ अनावश्यक.","इन्व्हर्टर कंप्रेसर योग्य — २४/७ चालतात.","वापरण्यायोग्य क्षमता तपासा."],phone:["सेन्सर आकार > मेगापिक्सेल.","OS अपडेट वर्षे तपासा.","प्रोसेसर > RAM.","ऑनलाइन MRP पेक्षा १०-२०% कमी."]};
+const defEN=["Compare on 3+ platforms.","Check brand site for MRP.","Brand warranties beat third-party.","Read reviews 2-3 months post-launch.","Ask for demo. Refusal = red flag."];
+const defMR=["३+ प्लॅटफॉर्मवर तुलना करा.","MRP साठी ब्रँड साइट तपासा.","ब्रँड वॉरंटी तृतीय-पक्षापेक्षा चांगली.","लॉन्चनंतर २-३ महिन्यांचे रिव्ह्यू वाचा.","डेमो मागा. नकार = धोक्याचे चिन्ह."];
+const scam=(id)=>lang==="mr"?(scamMR[id]||defMR):(scamEN[id]||defEN);
+
+const quizQs=[{q:t("q1"),o:[t("q1a"),t("q1b"),t("q1c"),t("q1d"),t("q1e"),t("q1f")]},{q:t("q2"),o:[t("q2a"),t("q2b"),t("q2c"),t("q2d"),t("q2e")]},{q:t("q3"),o:[t("q3a"),t("q3b"),t("q3c"),t("q3d"),t("q3e"),t("q3f")]},{q:t("q4"),o:[t("q4a"),t("q4b"),t("q4c"),t("q4d")]}];
+
+const CI=({compact})=>(<div style={{position:"relative"}}><input value={cityQ} onChange={e=>{setCityQ(e.target.value);setShowCD(true);}} onFocus={()=>setShowCD(true)} placeholder={t("yourCity")} style={{width:"100%",padding:compact?"10px 14px":"12px 16px",borderRadius:10,border:"1.5px solid var(--border)",fontSize:15,background:"#f5f5f7",fontFamily:"inherit"}}/>{showCD&&cityQ&&fCi.length>0&&<div style={{position:"absolute",top:"100%",left:0,right:0,background:"#fff",borderRadius:12,border:"1px solid var(--border)",boxShadow:"0 8px 24px rgba(0,0,0,.08)",zIndex:50,marginTop:4,overflow:"hidden"}}>{fCi.map(c=><div key={c} onClick={()=>selC(c)} style={{padding:"10px 14px",cursor:"pointer",fontSize:14,borderBottom:"1px solid #f2f2f7"}} onMouseEnter={e=>e.target.style.background="#f5f5f7"} onMouseLeave={e=>e.target.style.background="#fff"}>{c}</div>)}</div>}</div>);
+const Ld=({msg})=>(<div className="card" style={{padding:32,textAlign:"center",marginTop:20}}><div className="loader" style={{display:"flex",gap:6,justifyContent:"center",marginBottom:12}}><span/><span/><span/></div><p style={{color:"var(--sub)",fontSize:15}}>{msg}</p><p style={{color:"var(--sub)",fontSize:13,marginTop:4,opacity:.6}}>{t("takes")}</p></div>);
+const EB=()=>error?<div style={{background:"#fff2f2",borderRadius:12,padding:"12px 18px",marginTop:12,border:"1px solid #fecaca",color:"#dc2626",fontSize:14}}>{error}</div>:null;
+const ScamBox=({id})=>(<div style={{borderRadius:16,padding:"24px 28px",border:"1.5px solid #d2d2d7",background:"linear-gradient(135deg,#f5f5f7,#eef0f3)",marginTop:24}}><div style={{display:"flex",gap:10,alignItems:"center",marginBottom:16}}><Ic name="shield" size={22} color="#34c759"/><span style={{fontSize:18,fontWeight:700,fontFamily:"'Instrument Serif',serif"}}>{t("scamT")}</span></div>{scam(id).map((tip,i)=>(<div key={i} style={{display:"flex",gap:10,marginBottom:8,fontSize:14,lineHeight:1.6,color:"#48484a"}}><Ic name="check" size={16} color="#34c759"/><span>{tip}</span></div>))}</div>);
+const wts=[[t("wCeil"),"75"],[t("wTv"),"80"],[t("wFr"),"150"],[t("wAc1"),"1000"],[t("wAc15"),"1500"],[t("wGey"),"2000"],[t("wWash"),"500"],[t("wMic"),"1200"]];
+
+return(
+<div style={{minHeight:"100vh",background:"var(--bg)"}}>
+{/* NAV */}
+<nav style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 28px",borderBottom:"1px solid var(--border)",background:"rgba(245,245,247,.8)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",position:"sticky",top:0,zIndex:100}}>
+<div onClick={()=>{setView("home");setCatQ("");setError("");}} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:10}}><div style={{width:32,height:32,borderRadius:8,background:"#1d1d1f",display:"grid",placeItems:"center"}}><span style={{color:"#fff",fontSize:16,fontWeight:800,fontFamily:"'Instrument Serif',serif"}}>m</span></div><span style={{fontFamily:"'Instrument Serif',serif",fontSize:22,color:"#1d1d1f",letterSpacing:-.5}}>merit.</span></div>
+<div style={{display:"flex",gap:4,background:"#e8e8ed",borderRadius:10,padding:3}}>{[["home",t("browse")],["lab",t("lab")],["tools",t("tools")]].map(([v,l])=>(<button key={v} onClick={()=>{setView(v);setError("");}} style={{padding:"7px 16px",borderRadius:8,border:"none",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",background:(v==="home"&&isH)||(v==="lab"&&isLa)||(v==="tools"&&isTo)?"#fff":"transparent",color:"#1d1d1f",boxShadow:(v==="home"&&isH)||(v==="lab"&&isLa)||(v==="tools"&&isTo)?"0 1px 3px rgba(0,0,0,.1)":"none"}}>{l}</button>))}</div>
+<div style={{display:"flex",gap:8,alignItems:"center"}}><button onClick={()=>setL(lang==="en"?"mr":"en")} style={{padding:"5px 12px",borderRadius:8,border:"1.5px solid var(--border)",background:lang==="mr"?"var(--accentBg)":"#fff",cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:"inherit",color:lang==="mr"?"var(--accent)":"var(--sub)",display:"flex",alignItems:"center",gap:4}}><Ic name="lang" size={14}/>{lang==="mr"?"मरा":"EN"}</button>{city&&<span style={{fontSize:13,color:"var(--sub)",fontWeight:500}}>{city}</span>}<button onClick={()=>setView("settings")} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"#fff",cursor:"pointer",display:"grid",placeItems:"center",color:"var(--sub)"}}><Ic name="settings" size={16}/></button></div>
+</nav>
+
+<div style={{maxWidth:920,margin:"0 auto",padding:"0 24px 80px"}}>
+{/* SETTINGS */}
+{view==="settings"&&<div className="fade-up" style={{paddingTop:40}}><h2 style={{fontFamily:"'Instrument Serif',serif",fontSize:28,fontWeight:400,marginBottom:20}}>{t("settings")}</h2><div className="card" style={{padding:24,marginBottom:16}}><label style={{fontWeight:700,fontSize:15,display:"block",marginBottom:4}}>{t("gemKey")}</label><p style={{fontSize:13,color:"var(--sub)",marginBottom:12}}>{t("gemKeyD")}</p><div style={{display:"flex",gap:8}}><input type="password" value={apiKey} onChange={e=>{setApiKey(e.target.value);setApiSaved(false);}} placeholder="AIza..." style={{flex:1,padding:"10px 14px",borderRadius:10,border:"1.5px solid var(--border)",fontSize:14,fontFamily:"'JetBrains Mono'",background:"#f5f5f7"}}/><button className="btn btn-p" onClick={saveK} style={{padding:"10px 20px"}}>{apiSaved?t("saved"):t("save")}</button></div></div><div className="card" style={{padding:24,marginBottom:16}}><label style={{fontWeight:700,fontSize:15,display:"block",marginBottom:4}}>{t("cityLabel")}</label><p style={{fontSize:13,color:"var(--sub)",marginBottom:12}}>{t("cityD")}</p><CI/></div><div className="card" style={{padding:24,marginBottom:16}}><label style={{fontWeight:700,fontSize:15,display:"block",marginBottom:4}}>{t("language")}</label><p style={{fontSize:13,color:"var(--sub)",marginBottom:12}}>{t("langD")}</p><div style={{display:"flex",gap:8}}>{[["en","English"],["mr","मराठी"]].map(([k,l])=><button key={k} className={`pill ${lang===k?"active":""}`} onClick={()=>setL(k)} style={{padding:"10px 20px",fontSize:15}}>{l}</button>)}</div></div><button className="btn btn-s" onClick={()=>setView("home")}><Ic name="back" size={16}/> {t("back")}</button></div>}
+
+{/* HOME */}
+{view==="home"&&<div className="fade-up"><div style={{textAlign:"center",padding:"64px 0 48px"}}><p style={{fontSize:13,fontWeight:600,color:"var(--accent)",letterSpacing:1.5,textTransform:"uppercase",marginBottom:12}}>{t("heroTag")}</p><h1 className="hero-t" style={{fontFamily:"'Instrument Serif',serif",fontSize:52,fontWeight:400,lineHeight:1.1,marginBottom:16,letterSpacing:-1}}>{t("heroT1")}<br/>{t("heroT2")}<em>{t("heroT2em")}</em>{t("heroT2dot")}</h1><p style={{fontSize:18,color:"var(--sub)",maxWidth:480,margin:"0 auto",lineHeight:1.6}}>{t("heroSub")}</p></div>
+{!apiSaved&&<div className="card" style={{padding:"18px 24px",marginBottom:24,display:"flex",alignItems:"center",gap:16,flexWrap:"wrap",borderColor:"var(--accent)",borderStyle:"dashed"}}><div style={{flex:1,minWidth:200}}><div style={{fontWeight:700,fontSize:14}}>{t("oneTime")}</div><div style={{fontSize:13,color:"var(--sub)"}}>{t("oneTimeD")}</div></div><button className="btn btn-p" onClick={()=>setView("settings")} style={{padding:"8px 18px",fontSize:13}}>{t("setUp")}</button></div>}
+{!city&&<div className="card" style={{padding:"18px 24px",marginBottom:24}}><div style={{fontWeight:600,fontSize:14,marginBottom:8}}>{t("yourLoc")}</div><CI compact/></div>}
+<div style={{position:"relative",marginBottom:28}}><div style={{position:"absolute",left:16,top:"50%",transform:"translateY(-50%)",color:"var(--sub)"}}><Ic name="search" size={18}/></div><input value={catQ} onChange={e=>setCatQ(e.target.value)} placeholder={t("searchPH")} style={{width:"100%",padding:"14px 14px 14px 44px",borderRadius:12,border:"1.5px solid var(--border)",fontSize:16,background:"#fff"}}/></div>
+<div style={{display:"flex",gap:10,marginBottom:28,overflowX:"auto",paddingBottom:4}}>{[{i:"quiz",l:t("helpDecide"),a:()=>{setView("quiz");setQS(0);setQA([]);}},{i:"calc",l:t("elecCost"),a:()=>setView("calc")},{i:"deal",l:t("goodDeal"),a:()=>{setView("dealCheck");setDP("");setDPr("");}}].map(a=><button key={a.l} onClick={a.a} className="card" style={{padding:"12px 18px",display:"flex",alignItems:"center",gap:8,cursor:"pointer",flexShrink:0,border:"1.5px solid var(--border)",borderRadius:12,background:"#fff",fontSize:14,fontWeight:600,fontFamily:"inherit",color:"var(--text)"}}><Ic name={a.i} size={18} color="var(--accent)"/>{a.l}</button>)}</div>
+<div className="grid-3" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>{fCa.map((c,i)=><div key={c.id} className="card" onClick={()=>{setCat(c.id);setView("configure");setSub("");setPris([]);setBudget("");setNotes("");setResult("");setError("");setShowT(false);}} style={{padding:"20px 18px",cursor:"pointer",animation:`fadeUp .4s ease ${i*.02}s both`}}><div style={{color:"var(--accent)",marginBottom:10}}><Ic name={c.icon} size={28}/></div><div style={{fontWeight:700,fontSize:15,marginBottom:4}}>{t(c.tk)}</div><div style={{fontSize:12,color:"var(--sub)",lineHeight:1.4}}>{c.sub.slice(0,3).join(" · ")}</div></div>)}</div>
+<div style={{display:"flex",justifyContent:"center",gap:28,padding:"40px 0 0",flexWrap:"wrap"}}>{[["shield",t("noBias")],["zap",t("aiPow")],["check",t("indSpec")]].map(([ic,l])=><div key={l} style={{display:"flex",alignItems:"center",gap:6,fontSize:13,color:"var(--sub)",fontWeight:500}}><Ic name={ic} size={14}/>{l}</div>)}</div></div>}
+
+{/* CONFIGURE */}
+{view==="configure"&&co&&<div className="fade-up" style={{paddingTop:28}}>
+<button className="btn btn-s" onClick={()=>{setView("home");setCatQ("");}} style={{marginBottom:20,padding:"8px 16px",fontSize:13}}><Ic name="back" size={14}/> {t("allCats")}</button>
+<div style={{display:"flex",alignItems:"center",gap:14,marginBottom:28}}><div style={{width:48,height:48,borderRadius:12,background:"var(--accentBg)",display:"grid",placeItems:"center",color:"var(--accent)"}}><Ic name={co.icon} size={26}/></div><div><h2 style={{fontFamily:"'Instrument Serif',serif",fontSize:26,fontWeight:400}}>{t(co.tk)}</h2><p style={{fontSize:14,color:"var(--sub)"}}>{t("configPrefs")}</p></div></div>
+<div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,marginBottom:4,display:"block"}}>{t("typeL")}</label><p style={{fontSize:12,color:"var(--sub)",marginBottom:10}}>{t("typeD")}</p><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{co.sub.map(s=><button key={s} className={`pill ${sub===s?"active":""}`} onClick={()=>setSub(sub===s?"":s)}>{s}</button>)}</div></div>
+<div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,marginBottom:4,display:"block"}}>{t("whatMat")} <span style={{color:"var(--accent)"}}>*</span></label><p style={{fontSize:12,color:"var(--sub)",marginBottom:10}}>{t("priD")}</p><div className="grid-2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>{PRIS.map(o=>{const idx=pris.indexOf(o.id);return <div key={o.id} className={`pill ${idx!==-1?"active":""}`} onClick={()=>togP(o.id)} style={{padding:"10px 14px",display:"flex",alignItems:"center",gap:10,borderRadius:10}}>{idx!==-1&&<span style={{width:22,height:22,borderRadius:6,background:"var(--accent)",color:"#fff",fontSize:12,fontWeight:700,display:"grid",placeItems:"center",flexShrink:0}}>{idx+1}</span>}<div><div style={{fontWeight:600,fontSize:14}}>{t(o.l)}</div><div style={{fontSize:12,color:"var(--sub)"}}>{t(o.d)}</div></div></div>;})}</div></div>
+<div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,marginBottom:10,display:"block"}}>{t("budgetL")}</label><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{bds.map(b=><button key={b} className={`pill ${budget===b?"active":""}`} onClick={()=>setBudget(budget===b?"":b)}>{b}</button>)}</div></div>
+<div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,marginBottom:10,display:"block"}}>{t("householdL")}</label><div style={{display:"flex",gap:8}}>{["1-2","3-4","5-6","7+"].map(s=><button key={s} className={`pill ${hh===s?"active":""}`} onClick={()=>setHh(s)}>{s} {t("members")}</button>)}</div></div>
+<div className="card" style={{padding:22,marginBottom:20}}><label style={{fontWeight:700,fontSize:14,marginBottom:4,display:"block"}}>{t("anyElse")}</label><p style={{fontSize:12,color:"var(--sub)",marginBottom:10}}>{t("anyElseD")}</p><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={2} placeholder={t("optDet")} style={{width:"100%",padding:"10px 14px",borderRadius:10,border:"1.5px solid var(--border)",fontSize:14,resize:"vertical",background:"#f5f5f7",fontFamily:"inherit"}}/></div>
+<EB/><div style={{display:"flex",gap:10,alignItems:"center"}}><button className="btn btn-p" disabled={pris.length===0||loading} onClick={getRec}>{loading?t("analyzing"):t("getRec")}</button>{pris.length===0&&<span style={{fontSize:13,color:"var(--sub)"}}>{t("selPri")}</span>}</div>
+{loading&&<Ld msg={`${t("finding")} ${city||"you"}...`}/>}<ScamBox id={cat}/></div>}
+
+{/* RESULT */}
+{view==="result"&&<div ref={rR} className="fade-up" style={{paddingTop:28}}>
+<div style={{display:"flex",gap:8,marginBottom:20}}><button className="btn btn-s" onClick={()=>setView("configure")} style={{fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("adjust")}</button><button className="btn btn-s" onClick={()=>{setView("home");setCatQ("");}} style={{fontSize:13,padding:"8px 16px"}}>{t("newSearch")}</button></div>
+<div className="card" style={{padding:"14px 20px",marginBottom:20,display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}><Ic name={co?.icon} size={24} color="var(--accent)"/><div style={{flex:1}}><span style={{fontWeight:700,fontSize:15}}>{t(co?.tk)}</span>{sub&&<span style={{color:"var(--sub)",fontSize:14}}> · {sub}</span>}<div style={{fontSize:12,color:"var(--sub)"}}>{city&&`${city} · `}{budget&&`${budget} · `}{hh} {t("members")}</div></div></div>
+<div className="card" style={{padding:"28px 24px",lineHeight:1.7}}>{renderMD(result)}</div>
+{/* TERMINOLOGY */}
+{termos.length>0&&<div style={{marginTop:24}}><button onClick={()=>setShowT(!showT)} className="card" style={{width:"100%",padding:"18px 24px",cursor:"pointer",display:"flex",alignItems:"center",gap:12,border:"1.5px solid var(--accent)",background:showT?"var(--accentBg)":"white"}}><Ic name="book" size={22} color="var(--accent)"/><div style={{flex:1,textAlign:"left"}}><div style={{fontWeight:700,fontSize:16,color:"var(--accent)"}}>{t("termoT")}</div><div style={{fontSize:13,color:"var(--sub)"}}>{t("termoSub")}</div></div><div style={{transform:showT?"rotate(90deg)":"rotate(0)",transition:"transform .2s"}}><Ic name="arrow" size={18} color="var(--accent)"/></div></button>
+{showT&&<div style={{marginTop:12,animation:"fadeUp .3s ease"}}>{termos.map((tm,i)=><div key={i} className="termo-card"><div style={{fontWeight:700,fontSize:15,color:"#1d1d1f",marginBottom:4}}>{lang==="mr"?(tm.tm||tm.t):tm.t}</div><div style={{fontSize:14,lineHeight:1.65,color:"#48484a"}}>{lang==="mr"?tm.mr:tm.en}</div></div>)}</div>}</div>}
+<ScamBox id={cat}/><p style={{textAlign:"center",color:"var(--sub)",fontSize:12,padding:"24px 0"}}>{t("aiDisc")}</p></div>}
+
+{/* LAB */}
+{view==="lab"&&<div className="fade-up dark" style={{paddingTop:36,margin:"0 -24px",padding:"36px 24px 48px",minHeight:"80vh"}}><p style={{fontSize:12,fontWeight:600,color:"var(--accent)",letterSpacing:1.5,textTransform:"uppercase",marginBottom:8}}>{t("labTag")}</p><h1 style={{fontFamily:"'Instrument Serif',serif",fontSize:40,fontWeight:400,color:"#f5f5f7",marginBottom:8}}>{t("labT")}</h1><p style={{fontSize:16,color:"var(--darkSub)",marginBottom:32}}>{t("labSub")}</p>
+<div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:32}}>{[{id:"pc",ic:"pc",n:t("pcB"),d:t("pcBD")},{id:"setup",ic:"setup",n:t("gsB"),d:t("gsBD")},{id:"theater",ic:"theater",n:t("htB"),d:t("htBD")}].map(m=><div key={m.id} className="card" onClick={()=>{setLabMode(m.id);setView("labConfig");setPcP({});setPcB("");setPcU("");setLabN("");setResult("");setError("");}} style={{padding:22,cursor:"pointer"}}><div style={{color:"var(--accent)",marginBottom:12}}><Ic name={m.ic} size={28}/></div><div style={{fontWeight:700,fontSize:16,marginBottom:4,color:"#f5f5f7"}}>{m.n}</div><div style={{fontSize:13,color:"var(--darkSub)",lineHeight:1.5}}>{m.d}</div><div style={{marginTop:12,color:"var(--accent)",fontSize:13,fontWeight:600,display:"flex",alignItems:"center",gap:4}}>{t("configure")} <Ic name="arrow" size={14}/></div></div>)}</div></div>}
+
+{/* LAB CONFIG */}
+{view==="labConfig"&&<div className="fade-up dark" style={{margin:"0 -24px",padding:"28px 24px 48px",minHeight:"80vh"}}>
+<button className="btn btn-s" onClick={()=>setView("lab")} style={{marginBottom:20,fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("lab")}</button>
+<h2 style={{fontFamily:"'Instrument Serif',serif",fontSize:28,fontWeight:400,color:"#f5f5f7",marginBottom:24}}>{labMode==="pc"?t("pcB"):labMode==="setup"?t("gsB"):t("htB")}</h2>
+{labMode==="pc"&&<div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,color:"#f5f5f7",display:"block",marginBottom:4}}>{t("partsC")}</label><p style={{fontSize:12,color:"var(--darkSub)",marginBottom:14}}>{t("partsCd")}</p><div style={{display:"flex",flexDirection:"column",gap:8}}>{PCP.map(p=><div key={p.id}><label style={{fontSize:12,color:"var(--darkSub)",fontWeight:600,marginBottom:3,display:"block"}}>{lang==="mr"?p.nm:p.n}</label><input value={pcP[p.id]||""} onChange={e=>setPcP({...pcP,[p.id]:e.target.value})} placeholder={p.ph} style={{width:"100%",padding:"8px 12px",borderRadius:8,border:"1.5px solid var(--darkBorder)",fontSize:13,background:"#1c1c1e",color:"#f5f5f7",fontFamily:"inherit"}}/></div>)}</div></div>}
+<div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,color:"#f5f5f7",display:"block",marginBottom:10}}>{t("totBudget")}</label><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{["Under ₹50K","₹50K–80K","₹80K–1.2L","₹1.2L–2L","₹2L+","No limit"].map(b=><button key={b} className={`pill ${pcB===b?"active":""}`} onClick={()=>setPcB(pcB===b?"":b)}>{b}</button>)}</div></div>
+<div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,color:"#f5f5f7",display:"block",marginBottom:10}}>{t("priUse")}</label><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{(labMode==="pc"?["Gaming (1080p)","Gaming (1440p)","Gaming (4K)","Video Editing","3D Rendering","Streaming","Programming","General"]:labMode==="setup"?["Competitive FPS","RPG/Story","Sim Racing","Streaming + Gaming","Casual + Work"]:["Movies","Sports","Music","Gaming","All-rounder"]).map(u=><button key={u} className={`pill ${pcU===u?"active":""}`} onClick={()=>setPcU(pcU===u?"":u)}>{u}</button>)}</div></div>
+<div className="card" style={{padding:22,marginBottom:20}}><label style={{fontWeight:700,fontSize:14,color:"#f5f5f7",display:"block",marginBottom:6}}>{labMode==="theater"?t("roomDet"):t("addNotes")}</label><textarea value={labN} onChange={e=>setLabN(e.target.value)} rows={2} style={{width:"100%",padding:"10px 14px",borderRadius:10,border:"1.5px solid var(--darkBorder)",fontSize:14,resize:"vertical",background:"#1c1c1e",color:"#f5f5f7",fontFamily:"inherit"}}/></div>
+<EB/><button className="btn btn-p" disabled={loading} onClick={getLabR}>{loading?t("deepDive"):t("runDeep")}</button>{loading&&<Ld msg={t("runAnal")}/>}</div>}
+
+{/* LAB RESULT */}
+{view==="labResult"&&<div ref={rR} className="fade-up dark" style={{margin:"0 -24px",padding:"28px 24px 48px",minHeight:"80vh"}}><div style={{display:"flex",gap:8,marginBottom:20}}><button className="btn btn-s" onClick={()=>setView("labConfig")} style={{fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("adjust")}</button><button className="btn btn-s" onClick={()=>setView("lab")} style={{fontSize:13,padding:"8px 16px"}}>{t("labHome")}</button></div><div className="card" style={{padding:"28px 24px",lineHeight:1.7}}><div style={{color:"#f5f5f7"}}>{renderMD(result)}</div></div><p style={{textAlign:"center",color:"var(--darkSub)",fontSize:12,padding:"24px 0"}}>{t("labDisc")}</p></div>}
+
+{/* TOOLS */}
+{view==="tools"&&<div className="fade-up" style={{paddingTop:40}}><h2 style={{fontFamily:"'Instrument Serif',serif",fontSize:28,fontWeight:400,marginBottom:8}}>{t("toolsT")}</h2><p style={{fontSize:16,color:"var(--sub)",marginBottom:28}}>{t("toolsSub")}</p><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>{[{i:"quiz",n:t("hmdT"),d:t("hmdD"),a:()=>{setView("quiz");setQS(0);setQA([]);setResult("");setError("");}},{i:"calc",n:t("elCalc"),d:t("elCalcD"),a:()=>{setView("calc");setCW("");setCH("");}},{i:"deal",n:t("dealC"),d:t("dealCD"),a:()=>{setView("dealCheck");setDP("");setDPr("");setResult("");setError("");}},{i:"compare",n:t("compP"),d:t("compPD"),a:null}].map(x=><div key={x.n} className="card" onClick={x.a||undefined} style={{padding:22,cursor:x.a?"pointer":"default",opacity:x.a?1:.5}}><div style={{color:"var(--accent)",marginBottom:10}}><Ic name={x.i} size={24}/></div><div style={{fontWeight:700,fontSize:15,marginBottom:4}}>{x.n}</div><div style={{fontSize:13,color:"var(--sub)",lineHeight:1.5}}>{x.d}</div></div>)}</div></div>}
+
+{/* QUIZ */}
+{view==="quiz"&&<div className="fade-up" style={{paddingTop:40}}><button className="btn btn-s" onClick={()=>setView("tools")} style={{marginBottom:20,fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("tools")}</button><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}><Ic name="quiz" size={24} color="var(--accent)"/><h2 style={{fontFamily:"'Instrument Serif',serif",fontSize:26,fontWeight:400}}>{t("hmdT")}</h2></div><p style={{color:"var(--sub)",fontSize:14,marginBottom:24}}>{t("question")} {qS+1} {t("of")} {quizQs.length}</p><div style={{height:3,background:"#e5e5ea",borderRadius:2,marginBottom:28}}><div style={{height:"100%",background:"var(--accent)",borderRadius:2,width:`${((qS+1)/quizQs.length)*100}%`,transition:"width .3s"}}/></div>
+<div className="card" style={{padding:28}}><h3 style={{fontSize:20,fontWeight:600,marginBottom:20}}>{quizQs[qS].q}</h3><div style={{display:"flex",flexDirection:"column",gap:8}}>{quizQs[qS].o.map(o=><button key={o} className={`pill ${qA[qS]===o?"active":""}`} onClick={()=>{const a=[...qA];a[qS]=o;setQA(a);if(qS<quizQs.length-1)setTimeout(()=>setQS(qS+1),200);}} style={{padding:"14px 18px",textAlign:"left",fontSize:15,borderRadius:10}}>{o}</button>)}</div></div>
+<div style={{display:"flex",gap:8,marginTop:20}}>{qS>0&&<button className="btn btn-s" onClick={()=>setQS(qS-1)}>{t("prev")}</button>}{qS===quizQs.length-1&&qA[qS]&&<button className="btn btn-p" disabled={loading} onClick={runQ}>{loading?t("thinking"):t("getRec2")}</button>}</div><EB/>{loading&&<Ld msg={t("figuring")}/>}</div>}
+
+{view==="quizResult"&&<div className="fade-up" style={{paddingTop:28}}><div style={{display:"flex",gap:8,marginBottom:20}}><button className="btn btn-s" onClick={()=>{setView("quiz");setQS(0);}} style={{fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("retake")}</button><button className="btn btn-s" onClick={()=>setView("home")} style={{fontSize:13,padding:"8px 16px"}}>{t("browseAll")}</button></div><div className="card" style={{padding:"28px 24px",lineHeight:1.7}}>{renderMD(result)}</div></div>}
+
+{/* CALC */}
+{view==="calc"&&<div className="fade-up" style={{paddingTop:40}}><button className="btn btn-s" onClick={()=>setView("tools")} style={{marginBottom:20,fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("tools")}</button><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24}}><Ic name="zap" size={24} color="var(--accent)"/><h2 style={{fontFamily:"'Instrument Serif',serif",fontSize:26,fontWeight:400}}>{t("calcT")}</h2></div><div className="card" style={{padding:24}}>
+<div style={{marginBottom:16}}><label style={{fontWeight:600,fontSize:14,display:"block",marginBottom:6}}>{t("wattage")}</label><input type="number" value={cW} onChange={e=>setCW(e.target.value)} placeholder={t("wattPH")} style={{width:"100%",padding:"10px 14px",borderRadius:10,border:"1.5px solid var(--border)",fontSize:15,background:"#f5f5f7",fontFamily:"inherit"}}/><div style={{fontSize:12,color:"var(--sub)",marginTop:4}}>{t("wattH")}</div></div>
+<div style={{marginBottom:16}}><label style={{fontWeight:600,fontSize:14,display:"block",marginBottom:6}}>{t("hrsDay")}</label><input type="number" value={cH} onChange={e=>setCH(e.target.value)} placeholder={t("hrsPH")} style={{width:"100%",padding:"10px 14px",borderRadius:10,border:"1.5px solid var(--border)",fontSize:15,background:"#f5f5f7",fontFamily:"inherit"}}/></div>
+<div style={{marginBottom:20}}><label style={{fontWeight:600,fontSize:14,display:"block",marginBottom:6}}>{t("elRate")}</label><input type="number" value={cR} onChange={e=>setCR(e.target.value)} placeholder="8" style={{width:"100%",padding:"10px 14px",borderRadius:10,border:"1.5px solid var(--border)",fontSize:15,background:"#f5f5f7",fontFamily:"inherit"}}/><div style={{fontSize:12,color:"var(--sub)",marginTop:4}}>{t("rateH")}</div></div>
+{mC&&<div style={{background:"var(--accentBg)",borderRadius:14,padding:"20px 24px",textAlign:"center"}}><div style={{fontSize:13,color:"var(--accent)",fontWeight:600,marginBottom:4}}>{t("estMonth")}</div><div style={{fontSize:40,fontWeight:800,color:"var(--accent)",fontFamily:"'Instrument Serif',serif"}}>₹{parseInt(mC).toLocaleString()}</div><div style={{fontSize:13,color:"var(--sub)",marginTop:8}}>{cW}W × {cH}hrs × 30 ÷ 1000 × ₹{cR} = <strong>₹{mC}/{t("month")}</strong></div><div style={{fontSize:13,color:"var(--sub)",marginTop:4}}>{t("yearly")}: <strong>₹{(parseInt(mC)*12).toLocaleString()}</strong></div></div>}
+</div><div className="card" style={{padding:20,marginTop:14}}><div style={{fontWeight:700,fontSize:14,marginBottom:10}}>{t("comWatt")}</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>{wts.map(([n,w])=><button key={n} className="pill" onClick={()=>setCW(w)} style={{fontSize:12,padding:"5px 10px"}}>{n}: {w}W</button>)}</div></div></div>}
+
+{/* DEAL */}
+{view==="dealCheck"&&<div className="fade-up" style={{paddingTop:40}}><button className="btn btn-s" onClick={()=>setView("tools")} style={{marginBottom:20,fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("tools")}</button><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24}}><Ic name="deal" size={24} color="var(--accent)"/><h2 style={{fontFamily:"'Instrument Serif',serif",fontSize:26,fontWeight:400}}>{t("dealT")}</h2></div><div className="card" style={{padding:24}}><p style={{fontSize:14,color:"var(--sub)",marginBottom:20}}>{t("dealSub")}</p><div style={{marginBottom:16}}><label style={{fontWeight:600,fontSize:14,display:"block",marginBottom:6}}>{t("prodName")}</label><input value={dP} onChange={e=>setDP(e.target.value)} placeholder={t("prodPH")} style={{width:"100%",padding:"10px 14px",borderRadius:10,border:"1.5px solid var(--border)",fontSize:15,background:"#f5f5f7",fontFamily:"inherit"}}/></div><div style={{marginBottom:20}}><label style={{fontWeight:600,fontSize:14,display:"block",marginBottom:6}}>{t("priceQ")}</label><input type="number" value={dPr} onChange={e=>setDPr(e.target.value)} placeholder={t("pricePH")} style={{width:"100%",padding:"10px 14px",borderRadius:10,border:"1.5px solid var(--border)",fontSize:15,background:"#f5f5f7",fontFamily:"inherit"}}/></div><EB/><button className="btn btn-p" disabled={!dP||!dPr||loading} onClick={chkD}>{loading?t("checking"):t("verDeal")}</button></div>{loading&&<Ld msg={t("crossCheck")}/>}</div>}
+
+{view==="dealResult"&&<div className="fade-up" style={{paddingTop:28}}><div style={{display:"flex",gap:8,marginBottom:20}}><button className="btn btn-s" onClick={()=>setView("dealCheck")} style={{fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("checkAn")}</button></div><div className="card" style={{padding:"14px 20px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}><Ic name="deal" size={20} color="var(--accent)"/><div><strong>{dP}</strong> — <strong>₹{parseInt(dPr).toLocaleString()}</strong></div></div><div className="card" style={{padding:"28px 24px",lineHeight:1.7}}>{renderMD(result)}</div></div>}
+</div></div>);
+}
+
+
+=================================================================
+File: src/components/Icons.jsx
+=================================================================
+
+import React from 'react';
+
+export const I={ac:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="12" rx="2"/><path d="M6 20c1-2 2-4 6-4s5 2 6 4"/><line x1="8" y1="10" x2="16" y2="10"/></svg>,fridge:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="9" y1="6" x2="9" y2="8"/><line x1="9" y1="14" x2="9" y2="17"/></svg>,washer:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="2" width="18" height="20" rx="2"/><circle cx="12" cy="14" r="5"/><circle cx="12" cy="14" r="2"/></svg>,tv:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="14" rx="1"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="18" x2="12" y2="21"/></svg>,phone:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><line x1="10" y1="18" x2="14" y2="18"/></svg>,laptop:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>,tablet:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="10" y1="18" x2="14" y2="18"/></svg>,audio:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>,kitchen:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v6M8 2v6M16 2v6"/><path d="M6 8h12a2 2 0 0 1 2 2v2a6 6 0 0 1-12 0 6 6 0 0 1-6-2V10a2 2 0 0 1 2-2z"/><path d="M12 18v4"/></svg>,health:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>,smart:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,cool:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 7l-5 5-5-5"/><path d="M17 17l-5-5-5 5"/><line x1="2" y1="12" x2="22" y2="12"/></svg>,geyser:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2c1 3 4 5 4 9a4 4 0 1 1-8 0c0-4 3-6 4-9z"/><path d="M12 18v4"/><line x1="8" y1="22" x2="16" y2="22"/></svg>,gaming:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 11h4"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.544-.604-6.584-.685-7.258A4 4 0 0 0 17.32 5z"/></svg>,camera:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>,wearable:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="6" width="14" height="12" rx="6"/><path d="M9 6V3h6v3"/><path d="M9 18v3h6v-3"/><polyline points="12 10 12 13 14 14"/></svg>,network:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>,storage:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="6" rx="1"/><rect x="2" y="14" width="20" height="6" rx="1"/><circle cx="6" cy="7" r="1" fill="currentColor"/><circle cx="6" cy="17" r="1" fill="currentColor"/></svg>,pc:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,setup:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="12" height="9" rx="1"/><rect x="15" y="6" width="7" height="12" rx="1"/></svg>,theater:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="5" width="22" height="12" rx="1"/><polygon points="10 9 10 13 14 11 10 9" fill="currentColor"/><path d="M4 20h16"/></svg>,arrow:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,back:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>,search:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,settings:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,check:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,shield:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,zap:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,quiz:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>,calc:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><rect x="7" y="5" width="10" height="5" rx="1"/></svg>,deal:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,compare:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="8" height="16" rx="1"/><rect x="14" y="4" width="8" height="16" rx="1"/></svg>,book:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,lang:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>};
+export const Ic=({name,size=20,color})=>(<div style={{width:size,height:size,color:color||"currentColor",flexShrink:0}}>{I[name]}</div>);
+
+
+=================================================================
+File: src/data/constants.js
+=================================================================
+
+export const CATS=[{id:"ac",icon:"ac",tk:"cat_ac",sub:["Split AC","Window AC","Portable AC","Inverter AC"]},{id:"fridge",icon:"fridge",tk:"cat_fr",sub:["Single Door","Double Door","Side-by-Side","French Door"]},{id:"washer",icon:"washer",tk:"cat_wa",sub:["Front Load","Top Load","Semi-Auto","Washer-Dryer"]},{id:"tv",icon:"tv",tk:"cat_tv",sub:["LED","OLED","QLED","Smart TV","Projector"]},{id:"phone",icon:"phone",tk:"cat_ph",sub:["Flagship","Mid-Range","Budget","Camera","Gaming"]},{id:"laptop",icon:"laptop",tk:"cat_la",sub:["Ultrabook","Gaming","Business","2-in-1","Budget"]},{id:"tablet",icon:"tablet",tk:"cat_ta",sub:["Premium","Mid-Range","Kids","E-Reader"]},{id:"audio",icon:"audio",tk:"cat_au",sub:["Earbuds","Headphones","Soundbar","Smart Speaker"]},{id:"kitchen",icon:"kitchen",tk:"cat_ki",sub:["Microwave","Air Fryer","Mixer Grinder","Induction","Water Purifier"]},{id:"health",icon:"health",tk:"cat_he",sub:["Electric Toothbrush","Trimmer","Hair Dryer","BP Monitor"]},{id:"smart",icon:"smart",tk:"cat_sm",sub:["Smart Lock","Camera","Doorbell","Smart Plug","Robot Vacuum"]},{id:"cool",icon:"cool",tk:"cat_co",sub:["Ceiling Fan","Tower Fan","Air Cooler"]},{id:"geyser",icon:"geyser",tk:"cat_ge",sub:["Instant","Storage","Room Heater","Solar"]},{id:"gaming",icon:"gaming",tk:"cat_ga",sub:["Console","Monitor","Controller","VR Headset"]},{id:"camera",icon:"camera",tk:"cat_ca",sub:["DSLR","Mirrorless","Action Cam","Webcam"]},{id:"wearable",icon:"wearable",tk:"cat_we",sub:["Smartwatch","Fitness Band","Smart Ring"]},{id:"network",icon:"network",tk:"cat_ne",sub:["Wi-Fi Router","Mesh System","5G Router"]},{id:"storage",icon:"storage",tk:"cat_st",sub:["External SSD","Power Bank","UPS"]}];
+export const PRIS=[{id:"price",l:"pri_price",d:"pri_price_d"},{id:"quality",l:"pri_quality",d:"pri_quality_d"},{id:"quiet",l:"pri_quiet",d:"pri_quiet_d"},{id:"energy",l:"pri_energy",d:"pri_energy_d"},{id:"smart",l:"pri_smart",d:"pri_smart_d"},{id:"brand",l:"pri_brand",d:"pri_brand_d"},{id:"ease",l:"pri_ease",d:"pri_ease_d"},{id:"size",l:"pri_size",d:"pri_size_d"},{id:"perf",l:"pri_perf",d:"pri_perf_d"},{id:"design",l:"pri_design",d:"pri_design_d"}];
+export const BUD={ac:["Under ₹25K","₹25K–40K","₹40K–60K","₹60K+"],fridge:["Under ₹15K","₹15K–30K","₹30K–50K","₹50K+"],phone:["Under ₹10K","₹10K–20K","₹20K–40K","₹40K–70K","₹70K+"],laptop:["Under ₹30K","₹30K–50K","₹50K–80K","₹80K–1.2L","₹1.2L+"],default:["Budget","Mid-Range","Premium","Ultra Premium"]};
+export const CITIES=["Mumbai","Delhi","Bangalore","Hyderabad","Ahmedabad","Chennai","Kolkata","Pune","Jaipur","Surat","Lucknow","Nagpur","Indore","Thane","Bhopal","Patna","Ghaziabad","Nashik","Varanasi","Chandigarh","Coimbatore","Goa","Noida","Gurgaon","Kochi","Mysore","Dehradun","Bhubaneswar","Amritsar","Raipur","Mangalore","Udaipur","Pimpri-Chinchwad","Trivandrum"];
+export const PCP=[{id:"cpu",n:"Processor (CPU)",nm:"प्रोसेसर (CPU)",ph:"e.g. Ryzen 5 7600X"},{id:"gpu",n:"Graphics Card",nm:"ग्राफिक्स कार्ड",ph:"e.g. RTX 4060"},{id:"ram",n:"RAM",nm:"RAM",ph:"e.g. 16GB DDR5"},{id:"mobo",n:"Motherboard",nm:"मदरबोर्ड",ph:"e.g. B650"},{id:"stor",n:"Storage",nm:"स्टोरेज",ph:"e.g. 1TB NVMe SSD"},{id:"psu",n:"Power Supply",nm:"पॉवर सप्लाय",ph:"e.g. 650W 80+ Gold"},{id:"case",n:"Case",nm:"केस",ph:"e.g. Mid-tower ATX"},{id:"cool",n:"CPU Cooler",nm:"CPU कूलर",ph:"e.g. AIO 240mm"}];
+
+
+=================================================================
+File: src/data/i18n.js
+=================================================================
+
+export const T={en:{browse:"Browse",lab:"Lab",tools:"Tools",heroTag:"AI-Powered Tech Advisor",heroT1:"Every purchase,",heroT2:"well ",heroT2em:"considered",heroT2dot:".",heroSub:"Honest, AI-driven recommendations for every appliance and gadget in your home. No bias. No fluff.",oneTime:"One-time setup",oneTimeD:"Add your free Gemini API key to unlock AI features.",setUp:"Set up",yourLoc:"Your location",yourCity:"Your city...",searchPH:"Search products — AC, phone, toothbrush, router...",helpDecide:"Help me decide",elecCost:"Electricity cost",goodDeal:"Is this a good deal?",noBias:"No dealer bias",aiPow:"AI-powered",indSpec:"India-specific",settings:"Settings",gemKey:"Gemini API Key",gemKeyD:"Free from aistudio.google.com. Stored only in your browser.",save:"Save",saved:"Saved",cityLabel:"Your City",cityD:"For climate-aware, location-specific recommendations.",language:"Language",langD:"All UI and AI recommendations will switch to your chosen language.",back:"Back",allCats:"All categories",configPrefs:"Configure your preferences",typeL:"Type",typeD:"Optional — skip if unsure",whatMat:"What matters most?",priD:"Tap up to 5 in order of importance",budgetL:"Budget",householdL:"Household size",anyElse:"Anything else?",anyElseD:"Room size, elderly at home, need Wi-Fi control, etc.",optDet:"Optional details...",getRec:"Get recommendations",analyzing:"Analyzing...",selPri:"Select at least 1 priority",members:"members",
+pri_price:"Lowest Price",pri_price_d:"Best value for money",pri_quality:"Build Quality",pri_quality_d:"Durable & long-lasting",pri_quiet:"Quietness",pri_quiet_d:"Low noise operation",pri_energy:"Energy Efficiency",pri_energy_d:"Lower electricity bills",pri_smart:"Smart Features",pri_smart_d:"App control, automation",pri_brand:"Brand Trust",pri_brand_d:"Reliable after-sales",pri_ease:"Ease of Use",pri_ease_d:"Simple for everyone",pri_size:"Compact Size",pri_size_d:"Space-saving",pri_perf:"Performance",pri_perf_d:"Top specs",pri_design:"Design",pri_design_d:"Beautiful look",
+adjust:"Adjust",newSearch:"New search",aiDisc:"AI-generated. Verify prices and availability before purchasing.",termoT:"Technical Terms Explained",termoSub:"Don't know what these mean? Here's a simple guide.",scamT:"Scam Protection",
+labTag:"Advanced Users",labT:"The Lab.",labSub:"Deep-dive research for builds, setups, and serious configurations.",pcB:"PC Builder",pcBD:"Custom PC builds with compatibility checks, benchmarks & pricing",gsB:"Gaming Setup",gsBD:"Complete desk setup — monitor, peripherals, ergonomics",htB:"Home Theater",htBD:"TV, audio, streaming — optimized for your room",configure:"Configure",labPow:"Powered by deep AI research · More detailed than standard recommendations",partsC:"Parts you've already chosen",partsCd:"Leave blank for a full build suggestion",totBudget:"Total Budget",priUse:"Primary Use",roomDet:"Room details",addNotes:"Additional notes",runDeep:"Run deep analysis",deepDive:"Deep-diving...",labHome:"Lab Home",labDisc:"Deep analysis · AI-generated · Verify specs before purchasing",
+toolsT:"Tools",toolsSub:"Quick utilities to help you make better decisions.",hmdT:"Help Me Decide",hmdD:"Not sure what you need? Answer 4 quick questions.",elCalc:"Electricity Calculator",elCalcD:"Estimate monthly running cost of any appliance.",dealC:"Deal Checker",dealCD:"Is the price fair? Paste product & price to verify.",compP:"Compare Products",compPD:"Coming soon — side-by-side AI comparison.",
+question:"Question",of:"of",prev:"Previous",getRec2:"Get recommendation",thinking:"Thinking...",retake:"Retake quiz",browseAll:"Browse all",
+q1:"What's the main problem you're trying to solve?",q1a:"My room is too hot/cold",q1b:"I need a new phone/laptop",q1c:"Kitchen needs an upgrade",q1d:"Want better entertainment",q1e:"Home security/automation",q1f:"Personal care/health",
+q2:"Who is this primarily for?",q2a:"Myself (tech-savvy)",q2b:"Elderly parents",q2c:"Family with kids",q2d:"Students",q2e:"Working professional",
+q3:"What matters most?",q3a:"Saving money",q3b:"Ease of use",q3c:"Best performance",q3d:"Energy efficiency",q3e:"Low maintenance",q3f:"Smart/connected",
+q4:"Your budget preference?",q4a:"As cheap as possible",q4b:"Good value mid-range",q4c:"Premium, no compromise",q4d:"Flexible / unsure",
+calcT:"Electricity Cost Calculator",wattage:"Wattage (W)",wattPH:"e.g. 1500 for a 1.5-ton AC",wattH:"Check the label on the appliance or its spec sheet",hrsDay:"Hours used per day",hrsPH:"e.g. 8",elRate:"Electricity rate (₹/kWh)",rateH:"Average in India: ₹6-10/kWh depending on your state",estMonth:"Estimated Monthly Cost",yearly:"Yearly",month:"month",comWatt:"Common wattages",
+dealT:"Deal Checker",dealSub:"A dealer quoted you a price? Paste it here and we'll verify if it's fair.",prodName:"Product name / model",prodPH:"e.g. Daikin 1.5 Ton 5 Star Inverter Split AC MTKL50U",priceQ:"Price quoted (₹)",pricePH:"e.g. 42000",verDeal:"Verify deal",checking:"Checking...",checkAn:"Check another",
+finding:"Finding the best options for",takes:"This takes 10-15 seconds",crossCheck:"Cross-checking prices across platforms...",runAnal:"Running comprehensive analysis with benchmarks...",figuring:"Figuring out what you need...",
+cat_ac:"Air Conditioners",cat_fr:"Refrigerators",cat_wa:"Washing Machines",cat_tv:"Televisions",cat_ph:"Smartphones",cat_la:"Laptops",cat_ta:"Tablets",cat_au:"Audio",cat_ki:"Kitchen",cat_he:"Personal Care",cat_sm:"Smart Home",cat_co:"Fans & Coolers",cat_ge:"Water Heaters",cat_ga:"Gaming",cat_ca:"Cameras",cat_we:"Wearables",cat_ne:"Networking",cat_st:"Storage & Power",
+wCeil:"Ceiling Fan",wTv:'LED TV 43"',wFr:"Fridge",wAc1:"1-ton AC",wAc15:"1.5-ton AC",wGey:"Geyser",wWash:"Washing Machine",wMic:"Microwave"},
+
+mr:{browse:"शोधा",lab:"लॅब",tools:"साधने",heroTag:"AI-सक्षम टेक सल्लागार",heroT1:"प्रत्येक खरेदी,",heroT2:"चांगल्या ",heroT2em:"विचाराने",heroT2dot:".",heroSub:"तुमच्या घरातील प्रत्येक उपकरण आणि गॅजेटसाठी प्रामाणिक, AI-आधारित शिफारसी. कोणताही पूर्वग्रह नाही. फक्त खरा सल्ला.",oneTime:"एकदाच सेटअप",oneTimeD:"AI वैशिष्ट्ये सुरू करण्यासाठी तुमची मोफत Gemini API की जोडा.",setUp:"सेट करा",yourLoc:"तुमचे ठिकाण",yourCity:"तुमचे शहर...",searchPH:"उत्पादने शोधा — AC, फोन, टूथब्रश, राउटर...",helpDecide:"मला मदत करा",elecCost:"वीज खर्च",goodDeal:"हा सौदा चांगला आहे का?",noBias:"डीलरचा पूर्वग्रह नाही",aiPow:"AI-सक्षम",indSpec:"भारत-विशिष्ट",settings:"सेटिंग्ज",gemKey:"Gemini API की",gemKeyD:"aistudio.google.com वरून मोफत मिळवा. फक्त तुमच्या ब्राउझरमध्ये साठवली जाते.",save:"जतन करा",saved:"जतन झाले",cityLabel:"तुमचे शहर",cityD:"हवामान-जागरूक, ठिकाण-विशिष्ट शिफारसींसाठी.",language:"भाषा",langD:"सर्व UI आणि AI शिफारसी तुमच्या निवडलेल्या भाषेत बदलतील.",back:"मागे",allCats:"सर्व श्रेणी",configPrefs:"तुमच्या प्राधान्यांची निवड करा",typeL:"प्रकार",typeD:"ऐच्छिक — खात्री नसल्यास सोडा",whatMat:"तुम्हाला काय महत्त्वाचे आहे?",priD:"महत्त्वाच्या क्रमाने ५ पर्यंत निवडा",budgetL:"बजेट",householdL:"कुटुंबाचा आकार",anyElse:"आणखी काही?",anyElseD:"खोलीचा आकार, घरी वृद्ध, Wi-Fi कंट्रोल हवे, इ.",optDet:"ऐच्छिक तपशील...",getRec:"शिफारसी मिळवा",analyzing:"विश्लेषण...",selPri:"किमान १ प्राधान्य निवडा",members:"सदस्य",
+pri_price:"सर्वात कमी किंमत",pri_price_d:"पैशांचे सर्वोत्तम मूल्य",pri_quality:"बांधणी गुणवत्ता",pri_quality_d:"टिकाऊ आणि दीर्घकालीन",pri_quiet:"शांतता",pri_quiet_d:"कमी आवाज",pri_energy:"ऊर्जा बचत",pri_energy_d:"कमी वीज बिल",pri_smart:"स्मार्ट वैशिष्ट्ये",pri_smart_d:"ॲप नियंत्रण, ऑटोमेशन",pri_brand:"ब्रँड विश्वास",pri_brand_d:"विश्वसनीय विक्रीपश्चात सेवा",pri_ease:"वापरण्यास सोपे",pri_ease_d:"सर्वांसाठी सोपे",pri_size:"लहान आकार",pri_size_d:"जागा वाचवणारे",pri_perf:"कार्यक्षमता",pri_perf_d:"सर्वोत्तम स्पेक्स",pri_design:"डिझाइन",pri_design_d:"सुंदर दिसणारे",
+adjust:"बदला",newSearch:"नवीन शोध",aiDisc:"AI-निर्मित. खरेदी करण्यापूर्वी किंमत आणि उपलब्धता तपासा.",termoT:"तांत्रिक शब्दांचे स्पष्टीकरण",termoSub:"या शब्दांचा अर्थ माहीत नाही? येथे सोपे स्पष्टीकरण आहे.",scamT:"फसवणूक संरक्षण",
+labTag:"प्रगत वापरकर्ते",labT:"लॅब.",labSub:"बिल्ड्स, सेटअप्स आणि गंभीर कॉन्फिगरेशनसाठी सखोल संशोधन.",pcB:"PC बिल्डर",pcBD:"सुसंगतता तपासणी, बेंचमार्क आणि किंमतींसह कस्टम PC बिल्ड",gsB:"गेमिंग सेटअप",gsBD:"संपूर्ण डेस्क सेटअप — मॉनिटर, पेरिफेरल्स, एर्गोनॉमिक्स",htB:"होम थिएटर",htBD:"TV, ऑडिओ, स्ट्रीमिंग — तुमच्या खोलीसाठी अनुकूलित",configure:"कॉन्फिगर करा",labPow:"सखोल AI संशोधनाद्वारे · सामान्य शिफारसींपेक्षा अधिक तपशीलवार",partsC:"तुम्ही आधीच निवडलेले पार्ट्स",partsCd:"संपूर्ण बिल्ड सूचनेसाठी रिकामे ठेवा",totBudget:"एकूण बजेट",priUse:"प्राथमिक वापर",roomDet:"खोलीचे तपशील",addNotes:"अतिरिक्त नोट्स",runDeep:"सखोल विश्लेषण चालवा",deepDive:"सखोल विश्लेषण...",labHome:"लॅब होम",labDisc:"सखोल विश्लेषण · AI-निर्मित · खरेदी करण्यापूर्वी स्पेक्स तपासा",
+toolsT:"साधने",toolsSub:"चांगले निर्णय घेण्यासाठी झटपट उपयुक्तता.",hmdT:"मला मदत करा",hmdD:"काय हवे ते माहीत नाही? ४ प्रश्नांची उत्तरे द्या.",elCalc:"वीज कॅल्क्युलेटर",elCalcD:"कोणत्याही उपकरणाचा मासिक चालू खर्च अंदाज लावा.",dealC:"डील तपासणी",dealCD:"किंमत योग्य आहे का? उत्पादन आणि किंमत टाका.",compP:"उत्पादने तुलना",compPD:"लवकरच — शेजारी-शेजारी AI तुलना.",
+question:"प्रश्न",of:"पैकी",prev:"मागील",getRec2:"शिफारस मिळवा",thinking:"विचार करत आहे...",retake:"पुन्हा प्रश्नमंजुषा",browseAll:"सर्व पहा",
+q1:"तुम्ही कोणती समस्या सोडवण्याचा प्रयत्न करत आहात?",q1a:"माझी खोली खूप गरम/थंड आहे",q1b:"मला नवीन फोन/लॅपटॉप हवा",q1c:"किचन अपग्रेड हवे",q1d:"चांगले मनोरंजन हवे",q1e:"घर सुरक्षा/ऑटोमेशन",q1f:"वैयक्तिक काळजी/आरोग्य",
+q2:"हे प्रामुख्याने कोणासाठी आहे?",q2a:"मी स्वतः (टेक-सॅव्ही)",q2b:"वृद्ध आई-बाबा",q2c:"मुलांसह कुटुंब",q2d:"विद्यार्थी",q2e:"कामकाजी व्यावसायिक",
+q3:"सर्वात महत्त्वाचे काय?",q3a:"पैसे वाचवणे",q3b:"वापरण्यास सोपे",q3c:"सर्वोत्तम कार्यक्षमता",q3d:"ऊर्जा बचत",q3e:"कमी देखभाल",q3f:"स्मार्ट/कनेक्टेड",
+q4:"तुमचे बजेट प्राधान्य?",q4a:"शक्य तितके स्वस्त",q4b:"चांगले मूल्य मिड-रेंज",q4c:"प्रीमियम, कोणतीही तडजोड नाही",q4d:"लवचिक / खात्री नाही",
+calcT:"वीज खर्च कॅल्क्युलेटर",wattage:"वॉटेज (W)",wattPH:"उदा. 1.5-टन AC साठी 1500",wattH:"उपकरणावरील लेबल किंवा स्पेक शीट तपासा",hrsDay:"दिवसाला वापराचे तास",hrsPH:"उदा. 8",elRate:"वीज दर (₹/kWh)",rateH:"भारतात सरासरी: तुमच्या राज्यानुसार ₹६-१०/kWh",estMonth:"अंदाजित मासिक खर्च",yearly:"वार्षिक",month:"महिना",comWatt:"सामान्य वॉटेज",
+dealT:"डील तपासणी",dealSub:"डीलरने किंमत सांगितली? ती योग्य आहे का ते तपासूया.",prodName:"उत्पादनाचे नाव / मॉडेल",prodPH:"उदा. Daikin 1.5 Ton 5 Star Inverter Split AC MTKL50U",priceQ:"सांगितलेली किंमत (₹)",pricePH:"उदा. 42000",verDeal:"डील तपासा",checking:"तपासत आहे...",checkAn:"दुसरे तपासा",
+finding:"सर्वोत्तम पर्याय शोधत आहे",takes:"यास १०-१५ सेकंद लागतात",crossCheck:"विविध प्लॅटफॉर्मवर किंमती तपासत आहे...",runAnal:"बेंचमार्कसह सखोल विश्लेषण चालवत आहे...",figuring:"तुम्हाला काय हवे ते शोधत आहे...",
+cat_ac:"एअर कंडिशनर",cat_fr:"रेफ्रिजरेटर",cat_wa:"वॉशिंग मशीन",cat_tv:"टेलिव्हिजन",cat_ph:"स्मार्टफोन",cat_la:"लॅपटॉप",cat_ta:"टॅबलेट",cat_au:"ऑडिओ",cat_ki:"किचन",cat_he:"वैयक्तिक काळजी",cat_sm:"स्मार्ट होम",cat_co:"पंखे आणि कूलर",cat_ge:"वॉटर हीटर",cat_ga:"गेमिंग",cat_ca:"कॅमेरा",cat_we:"वेअरेबल्स",cat_ne:"नेटवर्किंग",cat_st:"स्टोरेज आणि पॉवर",
+wCeil:"सीलिंग फॅन",wTv:'LED TV 43"',wFr:"फ्रीज",wAc1:"१-टन AC",wAc15:"१.५-टन AC",wGey:"गिझर",wWash:"वॉशिंग मशीन",wMic:"मायक्रोवेव्ह"}};
+
+
+=================================================================
+File: src/data/terminology.js
+=================================================================
+
+export const TERMO={
+ac:[{t:"ISEER Rating",tm:"ISEER रेटिंग",en:"Indian Seasonal Energy Efficiency Ratio — measures how efficiently an AC cools over a season. Higher ISEER = lower bills. 5-star AC has ISEER 4.5+, 3-star around 3.5.",mr:"Indian Seasonal Energy Efficiency Ratio — संपूर्ण हंगामात AC किती कार्यक्षमतेने थंड करतो हे मोजतो. जास्त ISEER = कमी वीज बिल. ५-स्टार AC चा ISEER ४.५+ असतो तर ३-स्टार चा सुमारे ३.५."},
+{t:"Tonnage",tm:"टनेज",en:"Cooling capacity. 1 ton = 12,000 BTU/hr. 120 sq ft room → 1 ton. 180 sq ft → 1.5 ton. 240 sq ft → 2 ton. Match tonnage to room size.",mr:"कूलिंग क्षमता. १ टन = १२,००० BTU/तास. १२० चौ.फू. → १ टन. १८० चौ.फू. → १.५ टन. २४० चौ.फू. → २ टन. खोलीच्या आकारानुसार टनेज जुळवा."},
+{t:"Inverter vs Non-Inverter",tm:"इन्व्हर्टर वि. नॉन-इन्व्हर्टर",en:"Inverter ACs adjust compressor speed — quieter, 30-50% less electricity. Non-inverter turns on/off — cheaper upfront but noisy and costlier to run.",mr:"इन्व्हर्टर AC कंप्रेसरचा वेग समायोजित करतो — शांत, ३०-५०% कमी वीज. नॉन-इन्व्हर्टर वारंवार चालू/बंद होतो — सुरुवातीला स्वस्त पण गोंगाट करणारा."},
+{t:"Copper vs Aluminium Coil",tm:"कॉपर वि. ॲल्युमिनियम कॉइल",en:"Copper transfers heat better, easier to repair, lasts longer. Aluminium is cheaper but corrodes faster, especially in coastal cities.",mr:"कॉपर उष्णता चांगली हस्तांतरित करतो, दुरुस्त करणे सोपे, जास्त टिकतो. ॲल्युमिनियम स्वस्त पण लवकर गंजतो, विशेषतः किनारपट्टीच्या शहरांमध्ये."},
+{t:"BEE Star Rating",tm:"BEE स्टार रेटिंग",en:"Bureau of Energy Efficiency rating 1-5 stars. Each extra star = ~8-10% less electricity. 5-star 1.5-ton AC saves ₹500-700/month vs 3-star.",mr:"ब्यूरो ऑफ एनर्जी एफिशिएन्सी रेटिंग १-५ स्टार. प्रत्येक अतिरिक्त स्टार = ~८-१०% कमी वीज. ५-स्टार १.५-टन AC ३-स्टार पेक्षा दरमहा ₹५००-७०० वाचवतो."},
+{t:"R32 Refrigerant",tm:"R32 रेफ्रिजरंट",en:"Newer, eco-friendly refrigerant — zero ozone depletion, better efficiency. R410A is older, being phased out. Always prefer R32.",mr:"नवीन, पर्यावरणपूरक रेफ्रिजरंट — शून्य ओझोन हानी, चांगली कार्यक्षमता. R410A जुने आहे, बंद होत आहे. नेहमी R32 ला प्राधान्य द्या."}],
+fridge:[{t:"Gross vs Net Capacity",tm:"एकूण वि. निव्वळ क्षमता",en:"Gross includes compressor space. Net is usable storage. Always check net — it's 15-20% less than gross.",mr:"एकूण मध्ये कंप्रेसरची जागा समाविष्ट. निव्वळ म्हणजे वापरण्यायोग्य. नेहमी निव्वळ तपासा — एकूणपेक्षा १५-२०% कमी असते."},
+{t:"Inverter Compressor",tm:"इन्व्हर्टर कंप्रेसर",en:"Runs continuously at variable speed. 30% more efficient, quieter, lasts longer. Worth it since fridges run 24/7.",mr:"बदलत्या वेगाने सतत चालतो. ३०% अधिक कार्यक्षम, शांत, जास्त टिकतो. फ्रीज २४/७ चालत असल्याने योग्य."},
+{t:"Convertible Fridge",tm:"कन्व्हर्टिबल फ्रीज",en:"Convert freezer to fridge section or vice versa. Useful when guests visit or you need more fresh food storage.",mr:"फ्रीझर सेक्शन फ्रीज मध्ये बदलता येतो. पाहुणे आल्यावर किंवा जास्त ताज्या अन्नाची साठवण हवी असताना उपयुक्त."}],
+phone:[{t:"SoC (Processor)",tm:"SoC (प्रोसेसर)",en:"System on Chip — the phone's brain. Good processor > more RAM. 6GB + good SoC beats 12GB + bad SoC.",mr:"सिस्टम ऑन चिप — फोनचा मेंदू. चांगला प्रोसेसर > जास्त RAM. ६GB + चांगला SoC हा १२GB + वाईट SoC पेक्षा चांगला."},
+{t:"AMOLED vs IPS LCD",tm:"AMOLED वि. IPS LCD",en:"AMOLED: deeper blacks, vibrant colors, better battery. IPS LCD: natural colors, cheaper, no burn-in. AMOLED worth it above ₹12K.",mr:"AMOLED: गडद काळा, जिवंत रंग, चांगली बॅटरी. IPS LCD: नैसर्गिक रंग, स्वस्त, बर्न-इन नाही. ₹१२K वर AMOLED योग्य."},
+{t:"IP Rating",tm:"IP रेटिंग",en:"Ingress Protection — dust/water resistance. IP68 = dustproof + survives 1.5m underwater 30 min. IP54 = splash-proof only.",mr:"धूळ/पाणी प्रतिरोधकता. IP68 = धूळरोधक + ३० मिनिटे १.५मी पाण्याखाली टिकतो. IP54 = फक्त स्प्लॅश-प्रूफ."},
+{t:"Refresh Rate (Hz)",tm:"रिफ्रेश रेट (Hz)",en:"Screen updates per second. 60Hz = standard, 90Hz = smoother, 120Hz = buttery smooth. Higher uses slightly more battery.",mr:"स्क्रीन प्रति सेकंद अपडेट. ६०Hz = सामान्य, ९०Hz = सुरळीत, १२०Hz = अत्यंत सुरळीत. जास्त रेट थोडी जास्त बॅटरी वापरतो."}],
+tv:[{t:"OLED vs QLED vs LED",tm:"OLED वि. QLED वि. LED",en:"OLED: perfect blacks, best picture, expensive. QLED: bright, vibrant, great for lit rooms. LED: affordable, decent quality.",mr:"OLED: परिपूर्ण काळा, सर्वोत्तम चित्र, महाग. QLED: तेजस्वी, जिवंत, उजळ खोल्यांसाठी. LED: परवडणारा, चांगला दर्जा."},
+{t:"Dolby Vision / HDR10",tm:"Dolby Vision / HDR10",en:"High Dynamic Range — brighter highlights, deeper shadows. Dolby Vision is better (per-scene). Look for it for Netflix/Prime.",mr:"हाय डायनॅमिक रेंज — अधिक तेजस्वी, गडद सावल्या. Dolby Vision चांगले (प्रत्येक दृश्यानुसार). Netflix/Prime साठी शोधा."}],
+laptop:[{t:"SSD vs HDD",tm:"SSD वि. HDD",en:"SSD: boots in seconds, silent, fast. HDD: cheap per GB but slow. Always pick SSD — 256GB SSD beats 1TB HDD in experience.",mr:"SSD: सेकंदात सुरू, शांत, वेगवान. HDD: GB दराने स्वस्त पण हळू. नेहमी SSD निवडा — 256GB SSD अनुभवात 1TB HDD पेक्षा चांगला."},
+{t:"RAM",tm:"RAM",en:"Short-term memory. 8GB = basic tasks, 16GB = comfortable for all, 32GB = video editing. DDR5 is faster than DDR4.",mr:"अल्पकालीन मेमरी. 8GB = मूलभूत, 16GB = सर्वांसाठी आरामदायक, 32GB = व्हिडिओ एडिटिंग. DDR5 हे DDR4 पेक्षा वेगवान."}],
+washer:[{t:"Front Load vs Top Load",tm:"फ्रंट लोड वि. टॉप लोड",en:"Front: less water (50%), gentler, better wash, stackable. Top: cheaper, easier to load, faster. Front saves money long-term.",mr:"फ्रंट: कमी पाणी (५०%), सौम्य, चांगली धुलाई. टॉप: स्वस्त, लोड करणे सोपे, वेगवान. फ्रंट दीर्घकालीन पैसे वाचवतो."},
+{t:"RPM (Spin Speed)",tm:"RPM (स्पिन स्पीड)",en:"Higher RPM = dryer clothes after wash = faster drying. 800 basic, 1200 good, 1400+ almost dry. Important in humid cities.",mr:"जास्त RPM = धुलाईनंतर कोरडे कपडे = वेगवान वाळवणे. ८०० मूलभूत, १२०० चांगला, १४००+ जवळजवळ कोरडे. दमट शहरांमध्ये महत्त्वाचे."}],
+default:[{t:"BEE Star Rating",tm:"BEE स्टार रेटिंग",en:"Bureau of Energy Efficiency rates appliances 1-5 stars. More stars = less electricity = lower bills.",mr:"ब्यूरो ऑफ एनर्जी एफिशिएन्सी उपकरणांना १-५ स्टार देतो. अधिक स्टार = कमी वीज = कमी बिल."},
+{t:"Warranty vs Guarantee",tm:"वॉरंटी वि. गॅरंटी",en:"Warranty: repair/replace if defective. Guarantee: full replacement promise. Check what's covered — motor, compressor, PCB often differ.",mr:"वॉरंटी: सदोष असल्यास दुरुस्त/बदल. गॅरंटी: पूर्ण बदलीचे आश्वासन. काय समाविष्ट आहे ते तपासा — मोटर, कंप्रेसर, PCB अनेकदा वेगळे."},
+{t:"MRP vs Street Price",tm:"MRP वि. बाजार किंमत",en:"MRP is the ceiling, not selling price. Online is usually 10-25% below MRP. Always compare online before offline.",mr:"MRP ही कमाल मर्यादा आहे, विक्री किंमत नाही. ऑनलाइन सहसा MRP पेक्षा १०-२५% कमी. ऑफलाइन खरेदीपूर्वी नेहमी ऑनलाइन तुलना करा."}]};
+
+
+=================================================================
+File: src/index.css
+=================================================================
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#86868b;--border:#d2d2d7;--accent:#0071e3;--accent2:#147ce5;--accentBg:#e8f2fc;--hover:#f5f5f7;--darkCard:#1c1c1e;--darkSub:#98989d;--darkBorder:#38383a}
+::selection{background:#b3d7ff}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+input:focus,textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(0,113,227,.12)!important}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.fade-up{animation:fadeUp .5s ease both}
+.card{background:var(--card);border-radius:16px;border:1px solid var(--border);transition:all .2s}
+.card:hover{box-shadow:0 4px 24px rgba(0,0,0,.06);transform:translateY(-2px)}
+.pill{padding:6px 14px;border-radius:100px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:var(--card);cursor:pointer;transition:all .15s;font-family:inherit}
+.pill:hover{border-color:var(--accent);color:var(--accent)}
+.pill.active{border-color:var(--accent);background:var(--accentBg);color:var(--accent)}
+.btn{padding:12px 24px;border-radius:12px;font-size:15px;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit;display:inline-flex;align-items:center;gap:8px}
+.btn-p{background:var(--accent);color:#fff}
+.btn-p:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,113,227,.25)}
+.btn-p:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-s{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+.btn-s:hover{border-color:var(--sub);background:var(--hover)}
+.dark{background:#000;color:#f5f5f7}
+.dark .card{background:var(--darkCard);border-color:var(--darkBorder)}
+.dark .pill{background:var(--darkCard);border-color:var(--darkBorder);color:#f5f5f7}
+.dark .pill:hover,.dark .pill.active{border-color:var(--accent);color:var(--accent)}
+.dark .pill.active{background:rgba(0,113,227,.15)}
+.dark .btn-s{color:#f5f5f7;border-color:var(--darkBorder)}
+.dark input,.dark textarea{background:#1c1c1e!important;color:#f5f5f7!important;border-color:var(--darkBorder)!important}
+@media(max-width:700px){.grid-3{grid-template-columns:1fr 1fr!important}.grid-2{grid-template-columns:1fr!important}.hero-t{font-size:36px!important}}
+.loader span{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1s ease-in-out infinite}
+.loader span:nth-child(2){animation-delay:.15s}
+.loader span:nth-child(3){animation-delay:.3s}
+.termo-card{border-left:3px solid var(--accent);padding:14px 18px;margin-bottom:10px;border-radius:0 12px 12px 0;background:var(--accentBg)}
+
+
+=================================================================
+File: src/main.jsx
+=================================================================
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+
+=================================================================
+File: vite.config.js
+=================================================================
+
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  base: '/merit-app/', // Update this to match your GitHub repository name if it's different!
+})
