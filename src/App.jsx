@@ -236,7 +236,29 @@ Respond ONLY with valid JSON — no markdown, no code fences:
 
   /* ─── Parse JSON result ────────────────────── */
   let pR = null;
-  try { if (result && result.includes('"recs"')) { const m = result.match(/\{[\s\S]*\}/); if (m) pR = JSON.parse(m[0]); } } catch (e) {}
+  let jsonError = null;
+  try { 
+    if (result) { 
+      const start = result.indexOf('{');
+      const end = result.lastIndexOf('}');
+      if (start !== -1 && end !== -1 && end > start) {
+        let jsonStr = result.slice(start, end + 1);
+        try {
+          pR = JSON.parse(jsonStr);
+        } catch (err1) {
+          try {
+            // Fallback: aggressive sanitize (trailing commas & control chars)
+            let sanitized = jsonStr.replace(/,\s*([\]}])/g, '$1');
+            sanitized = sanitized.replace(/[\x00-\x1F\x7F-\x9F]/g, ' ');
+            pR = JSON.parse(sanitized);
+          } catch (err2) {
+            jsonError = "JSON Error: " + err2.message;
+            console.error("JSON parse failed", err2, "Raw string:", jsonStr);
+          }
+        }
+      }
+    } 
+  } catch (e) { console.error(e); }
 
   /* ─── Sub-components ───────────────────────── */
   const CI = ({ compact }) => (
@@ -890,7 +912,10 @@ Respond ONLY with valid JSON — no markdown, no code fences:
                 </div>
               </div>
             ) : (
-              <div className="card nm-flat" style={{ padding: '28px 26px', lineHeight: 1.7 }}>{renderMD(result)}</div>
+              <div className="card nm-flat" style={{ padding: '28px 26px', lineHeight: 1.7 }}>
+                {jsonError && <div style={{background: 'rgba(220,38,38,0.08)', color: '#b91c1c', padding: '12px 16px', borderRadius: 12, marginBottom: 20, fontSize: 13, fontWeight: 600}}>{jsonError}</div>}
+                {renderMD(result)}
+              </div>
             )}
 
             {/* Terminology */}
