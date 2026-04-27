@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { T } from './data/i18n';
 import { TERMO } from './data/terminology';
-import { CATS, PRIS, BUD, CITIES, PCP } from './data/constants';
+import { CATS, PRIS, BUD, CITIES, PCP, getCatConf } from './data/constants';
 import { Ic } from './components/Icons';
 import './index.css';
 
@@ -15,7 +15,7 @@ const[cat,setCat]=useState(null);const[sub,setSub]=useState("");const[pris,setPr
 const[budget,setBudget]=useState("");const[hh,setHh]=useState("3-4");const[notes,setNotes]=useState("");
 const[apiKey,setApiKey]=useState("");const[apiSaved,setApiSaved]=useState(false);
 const[loading,setLoading]=useState(false);const[result,setResult]=useState("");const[error,setError]=useState("");
-const[catQ,setCatQ]=useState("");const[saved,setSaved]=useState([]);const[compSel,setCompSel]=useState([]);const[labMode,setLabMode]=useState("pc");
+const[catQ,setCatQ]=useState("");const[saved,setSaved]=useState([]);const[activeTile,setActiveTile]=useState(null);const[compSel,setCompSel]=useState([]);const[labMode,setLabMode]=useState("pc");
 const[pcP,setPcP]=useState({});const[pcB,setPcB]=useState("");const[pcU,setPcU]=useState("");const[labN,setLabN]=useState("");
 const[qS,setQS]=useState(0);const[qA,setQA]=useState([]);
 const[cW,setCW]=useState("");const[cH,setCH]=useState("");const[cR,setCR]=useState("8");
@@ -27,14 +27,14 @@ const saveK=()=>{if(apiKey.trim()){localStorage.setItem("m_key",apiKey.trim());s
 const selC=(c)=>{setCity(c);setCityQ(c);setShowCD(false);localStorage.setItem("m_city",c);};
 const setL=(l)=>{setLang(l);localStorage.setItem("m_lang",l);};const togC=(r)=>setCompSel(p=>p.includes(r)?p.filter(x=>x!==r):p.length<4?[...p,r]:p);const togS=(r)=>{setSaved(p=>{const isS=p.find(x=>x.name===r.name);const n=isS?p.filter(x=>x.name!==r.name):[...p,r];localStorage.setItem("m_saved",JSON.stringify(n));return n;});};
 const togP=(id)=>setPris(p=>p.includes(id)?p.filter(x=>x!==id):p.length<5?[...p,id]:p);
-const co=CATS.find(c=>c.id===cat);const bds=BUD[cat]||BUD.default;
+const co=CATS.find(c=>c.id===cat);const conf=co?getCatConf(cat,sub):{};const bds=conf.bud||[];const showHH=conf.hasHH;
 const fCi=CITIES.filter(c=>c.toLowerCase().includes(cityQ.toLowerCase())).slice(0,6);
 const fCa=CATS.filter(c=>(T[lang]?.[c.tk]||"").toLowerCase().includes(catQ.toLowerCase())||c.sub.some(s=>s.toLowerCase().includes(catQ.toLowerCase())));
 const langI=lang==="mr"?"\n\nIMPORTANT: Respond ENTIRELY in Marathi (मराठी). Use Devanagari script. Keep product names, brand names, model numbers in English. All explanations in Marathi. Use simple Marathi a 60-year-old parent can understand.":"";
 
 const callAI=async(prompt)=>{if(!apiKey){setError(lang==="mr"?"कृपया सेटिंग्जमध्ये Gemini API की सेट करा.":"Set your Gemini API key in settings.");return;}setLoading(true);setError("");setResult("");try{const isJson=prompt.includes("valid JSON");const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt+langI}]}],generationConfig:{temperature:0.7,maxOutputTokens:5000,...(isJson&&{responseMimeType:"application/json"})}})});if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`Error ${r.status}`);}const d=await r.json();const tx=d?.candidates?.[0]?.content?.parts?.[0]?.text;if(!tx)throw new Error("Empty response");setResult(tx);}catch(e){setError(e.message);}finally{setLoading(false);}};
 
-const getRec=()=>{const pl=pris.map((p,i)=>`${i+1}. ${t(PRIS.find(o=>o.id===p)?.l)}`).join(", ");const pr=`You are merit. — India's trusted tech advisor.\n\n**Request:** Best ${sub||""} ${t(co?.tk)} recommendation\n**City:** ${city||"Not specified"} | **Household:** ${hh} members | **Budget:** ${budget||"Flexible"}\n**Priorities:** ${pl||"None"}\n**Notes:** ${notes||"None"}\n\nProvide exactly 7 unbiased product recommendations (1 exact match, 2 all-rounders, 4 alternatives/wildcards).\nYou MUST output ONLY valid JSON exactly matching this structure:\n{\n  "recs": [\n    { "name": "Model", "price": "45000", "badge": "🏆 Best Value", "specs": ["spec 1", "spec 2"], "why": "reason", "cons": "tradeoff" }\n  ],\n  "advice": ["Tip 1", "Tip 2"],\n  "comparison": "A short 2-sentence summary comparing the options."\n}\n\nDo not use Markdown code blocks. Just valid JSON.`;callAI(pr).then(()=>{setView("result");setTimeout(()=>rR.current?.scrollIntoView({behavior:"smooth"}),100);});};
+const getRec=()=>{const pl=pris.map((p,i)=>`${i+1}. ${t(PRIS.find(o=>o.id===p)?.l)}`).join(", ");const pr=`You are merit. — India's trusted tech advisor.\n\n**Request:** Best ${sub||""} ${t(co?.tk)} recommendation\n**City:** ${city||"Not specified"} ${showHH ? `| **Household:** ${hh} members |` : ''} **Budget:** ${budget||"Flexible"}\n**Priorities:** ${pl||"None"}\n**Notes:** ${notes||"None"}\n\nProvide exactly 6 unbiased product recommendations (2 exact match, 2 all-rounders, 2 alternatives/wildcards).\nYou MUST output ONLY valid JSON exactly matching this structure:\n{\n  "recs": [\n    { "name": "Model", "price": "45000", "badge": "🏆 Best Value", "specs": ["spec 1", "spec 2"], "why": "reason", "cons": "tradeoff" }\n  ],\n  "advice": ["Tip 1", "Tip 2"],\n  "comparison": "A short 2-sentence summary comparing the options."\n}\n\nDo not use Markdown code blocks. Just valid JSON.`;callAI(pr).then(()=>{setView("result");setTimeout(()=>rR.current?.scrollIntoView({behavior:"smooth"}),100);});};
 
 const getLabR=()=>{const ps=Object.entries(pcP).filter(([,v])=>v).map(([k,v])=>`${PCP.find(p=>p.id===k)?.n}: ${v}`).join("\n");const pr=labMode==="pc"?`PC Build advisor. Budget: ${pcB||"Flexible"}, Use: ${pcU||"General"}\nParts:\n${ps||"None"}\nNotes: ${labN||"None"}\n\nProvide: Build Analysis, Recommended Build (₹ prices), Compatibility Check, Performance Estimates, Upgrade Path, Where to Buy, Pro Tips`:labMode==="setup"?`Gaming setup advisor. Budget: ${pcB||"Flexible"}, Use: ${pcU||"General"}\nNotes: ${labN||"None"}\n\nRecommend complete setup with ₹ prices.`:`Home theater advisor. Budget: ${pcB||"Flexible"}, Room: ${labN||"Not specified"}\n\nRecommend TV/audio/streaming with ₹ prices.`;callAI(`You are merit. Lab — advanced advisor. Do DEEP research.\n\n${pr}`).then(()=>{setView("labResult");setTimeout(()=>rR.current?.scrollIntoView({behavior:"smooth"}),100);});};
 
@@ -83,7 +83,7 @@ return(
       <div style={{background:"#f5f5f7",padding:"10px 14px",borderRadius:8,fontSize:12,marginBottom:12}}>
         {r.specs.slice(0,3).map((s,j)=><div key={j} style={{color:"#48484a",marginBottom:4}}>• {s}</div>)}
       </div>
-      <button onClick={()=>togS(r)} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",cursor:"pointer",padding:4}}><Ic name="heart" size={18} color="var(--accent)"/></button>
+      <button onClick={(e)=>{e.stopPropagation();togS(r);}} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",cursor:"pointer",padding:4}}><Ic name="heart" size={18} color="var(--accent)"/></button>
     </div>)}
   </div>}
 </div>}
@@ -127,9 +127,9 @@ return(
 <button className="btn btn-s" onClick={()=>{setView("home");setCatQ("");}} style={{marginBottom:20,padding:"8px 16px",fontSize:13}}><Ic name="back" size={14}/> {t("allCats")}</button>
 <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:28}}><div style={{width:48,height:48,borderRadius:12,background:"var(--accentBg)",display:"grid",placeItems:"center",color:"var(--accent)"}}><Ic name={co.icon} size={26}/></div><div><div style={{fontSize:12,fontWeight:700,color:"var(--accent)",letterSpacing:1,textTransform:"uppercase",marginBottom:4}}>{t("step")} 2 {t("of")} 3</div><h2 style={{fontFamily:"inherit",fontSize:26,fontWeight:400}}>{t(co.tk)}</h2><p style={{fontSize:14,color:"var(--sub)"}}>{t("configPrefs")}</p></div></div>
 <div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,marginBottom:4,display:"block"}}>{t("typeL")}</label><p style={{fontSize:12,color:"var(--sub)",marginBottom:10}}>{t("typeD")}</p><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{co.sub.map(s=><button key={s} className={`pill ${sub===s?"active":""}`} onClick={()=>setSub(sub===s?"":s)}>{s}</button>)}</div></div>
-<div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,marginBottom:4,display:"block"}}>{t("whatMat")} <span style={{color:"var(--accent)"}}>*</span></label><p style={{fontSize:12,color:"var(--sub)",marginBottom:10}}>{t("priD")}</p><div className="grid-2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>{PRIS.map(o=>{const idx=pris.indexOf(o.id);return <div key={o.id} className={`pill ${idx!==-1?"active":""}`} onClick={()=>togP(o.id)} style={{padding:"10px 14px",display:"flex",alignItems:"center",gap:10,borderRadius:10}}>{idx!==-1&&<span style={{width:22,height:22,borderRadius:6,background:"var(--accent)",color:"#fff",fontSize:12,fontWeight:700,display:"grid",placeItems:"center",flexShrink:0}}>{idx+1}</span>}<div><div style={{fontWeight:600,fontSize:14}}>{t(o.l)}</div><div style={{fontSize:12,color:"var(--sub)"}}>{t(o.d)}</div></div></div>;})}</div></div>
+<div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,marginBottom:4,display:"block"}}>{t("whatMat")} <span style={{color:"var(--accent)"}}>*</span></label><p style={{fontSize:12,color:"var(--sub)",marginBottom:10}}>{t("priD")}</p><div className="grid-2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>{PRIS.map(o=>{if(!conf.pris?.includes(o.id))return null;const idx=pris.indexOf(o.id);return <div key={o.id} className={`pill ${idx!==-1?"active":""}`} onClick={()=>togP(o.id)} style={{padding:"10px 14px",display:"flex",alignItems:"center",gap:10,borderRadius:10}}>{idx!==-1&&<span style={{width:22,height:22,borderRadius:6,background:"var(--accent)",color:"#fff",fontSize:12,fontWeight:700,display:"grid",placeItems:"center",flexShrink:0}}>{idx+1}</span>}<div><div style={{fontWeight:600,fontSize:14}}>{t(o.l)}</div><div style={{fontSize:12,color:"var(--sub)"}}>{t(o.d)}</div></div></div>;})}</div></div>
 <div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,marginBottom:10,display:"block"}}>{t("budgetL")}</label><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{bds.map(b=><button key={b} className={`pill ${budget===b?"active":""}`} onClick={()=>setBudget(budget===b?"":b)}>{b}</button>)}</div></div>
-<div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,marginBottom:10,display:"block"}}>{t("householdL")}</label><div style={{display:"flex",gap:8}}>{["1-2","3-4","5-6","7+"].map(s=><button key={s} className={`pill ${hh===s?"active":""}`} onClick={()=>setHh(s)}>{s} {t("members")}</button>)}</div></div>
+{showHH&&<div className="card" style={{padding:22,marginBottom:14}}><label style={{fontWeight:700,fontSize:14,marginBottom:10,display:"block"}}>{t("householdL")}</label><div style={{display:"flex",flexWrap:"wrap",gap:8}}>{["1-2","3-4","5-6","7+"].map(s=><button key={s} className={`pill ${hh===s?"active":""}`} onClick={()=>setHh(s)}>{s} {t("members")}</button>)}</div></div>}
 <div className="card" style={{padding:22,marginBottom:20}}><label style={{fontWeight:700,fontSize:14,marginBottom:4,display:"block"}}>{t("anyElse")}</label><p style={{fontSize:12,color:"var(--sub)",marginBottom:10}}>{t("anyElseD")}</p><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={2} placeholder={t("optDet")} style={{width:"100%",padding:"10px 14px",borderRadius:10,border:"1.5px solid var(--border)",fontSize:14,resize:"vertical",background:"#f5f5f7",fontFamily:"inherit"}}/></div>
 <EB/><div style={{display:"flex",gap:10,alignItems:"center"}}><button className="btn btn-p" disabled={pris.length===0||loading} onClick={getRec}>{loading?t("analyzing"):t("getRec")}</button>{pris.length===0&&<span style={{fontSize:13,color:"var(--sub)"}}>{t("selPri")}</span>}</div>
 {loading&&<Ld msg={`${t("finding")} ${city||"you"}...`}/>}<ScamBox id={cat}/></div>}
@@ -138,10 +138,35 @@ return(
 {view==="result"&&<div ref={rR} className="fade-up" style={{paddingTop:28}}>
 <div style={{display:"flex",gap:8,marginBottom:20}}><button className="btn btn-s" onClick={()=>setView("configure")} style={{fontSize:13,padding:"8px 16px"}}><Ic name="back" size={14}/> {t("adjust")}</button><button className="btn btn-s" onClick={()=>{setView("home");setCatQ("");}} style={{fontSize:13,padding:"8px 16px"}}>{t("newSearch")}</button></div>
 <div style={{fontSize:12,fontWeight:700,color:"var(--accent)",letterSpacing:1,textTransform:"uppercase",marginBottom:12}}>{t("step")} 3 {t("of")} 3</div><div className="card" style={{padding:"14px 20px",marginBottom:20,display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}><Ic name={co?.icon} size={24} color="var(--accent)"/><div style={{flex:1}}><span style={{fontWeight:700,fontSize:15}}>{t(co?.tk)}</span>{sub&&<span style={{color:"var(--sub)",fontSize:14}}> · {sub}</span>}<div style={{fontSize:12,color:"var(--sub)"}}>{city&&`${city} · `}{budget&&`${budget} · `}{hh} {t("members")}</div></div></div>
+
+{activeTile&&<div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",background:"rgba(245,245,247,0.7)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:24,overflowY:"auto"}} onClick={()=>setActiveTile(null)}>
+  <div className="card" onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:600,padding:32,position:"relative",animation:"fadeUp 0.3s ease",maxHeight:"90vh",overflowY:"auto"}}>
+    <button onClick={()=>setActiveTile(null)} style={{position:"absolute",top:20,right:20,background:"#f2f2f7",border:"none",borderRadius:"50%",width:32,height:32,display:"grid",placeItems:"center",cursor:"pointer"}}><Ic name="close" size={16}/></button>
+    <div style={{fontSize:13,fontWeight:700,color:"var(--accent)",marginBottom:12}}>{activeTile.badge}</div>
+    <h2 style={{fontFamily:"inherit",fontSize:26,fontWeight:800,marginBottom:8,paddingRight:32,lineHeight:1.3}}>{activeTile.name}</h2>
+    <div style={{fontSize:24,fontWeight:800,marginBottom:24,color:"#1d1d1f"}}>₹{parseInt(activeTile.price.toString().replace(/\D/g,'')||"0").toLocaleString()}</div>
+    
+    <h3 style={{fontSize:16,fontWeight:700,marginBottom:8}}>Why it's recommended</h3>
+    <p style={{fontSize:15,color:"var(--sub)",lineHeight:1.6,marginBottom:24}}>{activeTile.why}</p>
+    
+    <h3 style={{fontSize:16,fontWeight:700,marginBottom:10}}>Key Specifications</h3>
+    <div style={{background:"#f5f5f7",padding:"16px 20px",borderRadius:12,marginBottom:24}}>
+      {activeTile.specs.map((s,i)=><div key={i} style={{fontSize:14,color:"#48484a",marginBottom:8}}>• {s}</div>)}
+    </div>
+
+    <h3 style={{fontSize:16,fontWeight:700,marginBottom:8}}>Trade-offs</h3>
+    <p style={{fontSize:15,color:"#dc2626",lineHeight:1.6,marginBottom:32}}>{activeTile.cons}</p>
+
+    <div style={{display:"flex",gap:12}}>
+      <button className="btn btn-p" onClick={()=>window.open(`https://www.google.com/search?q=${encodeURIComponent(activeTile.name+" buy india")}`,"_blank")} style={{flex:1,padding:"14px"}}>Search Prices Online</button>
+      <button className="btn btn-s" onClick={()=>togS(activeTile)} style={{width:52,padding:0,display:"grid",placeItems:"center",border:saved.find(x=>x.name===activeTile.name)?"1.5px solid var(--accent)":"1.5px solid var(--border)",background:saved.find(x=>x.name===activeTile.name)?"var(--accentBg)":"#fff"}}><Ic name="heart" size={22} color={saved.find(x=>x.name===activeTile.name)?"var(--accent)":"var(--sub)"}/></button>
+    </div>
+  </div>
+</div>}
 {pR&&pR.recs?(
 <div>
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))",gap:16,marginBottom:24}}>
-    {pR.recs.map((r,i)=><div key={i} className="card" style={{padding:20,display:"flex",flexDirection:"column",position:"relative",transition:"transform 0.2s, box-shadow 0.2s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 12px 32px rgba(0,0,0,0.1)";}} onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none";}}>
+    {pR.recs.map((r,i)=><div key={i} className="card" onClick={()=>setActiveTile(r)} style={{padding:20,display:"flex",flexDirection:"column",position:"relative",cursor:"pointer",transition:"transform 0.2s, box-shadow 0.2s"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 12px 32px rgba(0,0,0,0.1)";}} onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none";}}>
       <div style={{fontSize:12,fontWeight:700,color:"var(--accent)",marginBottom:8}}>{r.badge}</div>
       <div style={{fontWeight:700,fontSize:16,marginBottom:4,paddingRight:24}}>{r.name}</div>
       <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>₹{parseInt(r.price.toString().replace(/\D/g,'')||"0").toLocaleString()}</div>
@@ -150,7 +175,7 @@ return(
         {r.specs.slice(0,3).map((s,j)=><div key={j} style={{color:"#48484a",marginBottom:4}}>• {s}</div>)}
       </div>
       <div style={{fontSize:12,color:"#dc2626",lineHeight:1.4}}><strong>Cons:</strong> {r.cons}</div>
-      <button onClick={()=>togS(r)} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",cursor:"pointer",padding:4}}><Ic name="heart" size={18} color={saved.find(x=>x.name===r.name)?"var(--accent)":"var(--border)"}/></button>
+      <button onClick={(e)=>{e.stopPropagation();togS(r);}} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",cursor:"pointer",padding:4}}><Ic name="heart" size={18} color={saved.find(x=>x.name===r.name)?"var(--accent)":"var(--border)"}/></button>
     </div>)}
   </div>
   <div className="card" style={{padding:24}}>
