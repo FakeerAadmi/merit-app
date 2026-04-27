@@ -81,7 +81,7 @@ return(
       <div style={{fontWeight:700,fontSize:16,marginBottom:4,paddingRight:24}}>{r.name}</div>
       <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>₹{parseInt(r.price.toString().replace(/\D/g,'')||"0").toLocaleString()}</div>
       <div style={{background:"#f5f5f7",padding:"10px 14px",borderRadius:8,fontSize:12,marginBottom:12}}>
-        {r.specs.slice(0,3).map((s,j)=><div key={j} style={{color:"#48484a",marginBottom:4}}>• {s}</div>)}
+        {(Array.isArray(r.specs)?r.specs:Object.entries(r.specs||{}).map(([k,v])=>`${k}: ${v}`)).slice(0,3).map((s,j)=><div key={j} style={{color:"#48484a",marginBottom:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>• {s}</div>)}
       </div>
       <button onClick={(e)=>{e.stopPropagation();togS(r);}} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",cursor:"pointer",padding:4}}><Ic name="heart" size={18} color="var(--accent)"/></button>
     </div>)}
@@ -103,9 +103,10 @@ return(
     <tbody>
       <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Price</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:18,fontWeight:800}}>₹{parseInt(r.price.toString().replace(/\D/g,'')||"0").toLocaleString()}</td>)}</tr>
       <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Badge</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",color:"var(--accent)",fontWeight:600}}>{r.badge}</td>)}</tr>
-      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Specs</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:13,lineHeight:1.6}}>{r.specs.map((s,j)=><div key={j}>• {s}</div>)}</td>)}</tr>
-      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Why Buy</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:13,lineHeight:1.6}}>{r.why}</td>)}</tr>
-      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Cons</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:13,lineHeight:1.6,color:"#dc2626"}}>{r.cons}</td>)}</tr>
+      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Specs</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:13,lineHeight:1.6}}>{(Array.isArray(r.specs)?r.specs:Object.entries(r.specs||{}).map(([k,v])=>`${k}: ${v}`)).map((s,j)=><div key={j}>• {s}</div>)}</td>)}</tr>
+      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Summary</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:13,lineHeight:1.6}}>{r.summary || r.why}</td>)}</tr>
+      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Pros</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:13,lineHeight:1.6,color:"#34c759"}}>{(r.pros||[]).map((p,j)=><div key={j}>• {p}</div>)}</td>)}</tr>
+      <tr><td style={{padding:"16px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--sub)"}}>Cons</td>{compSel.map((r,i)=><td key={i} style={{padding:"16px",borderBottom:"1px solid var(--border)",fontSize:13,lineHeight:1.6,color:"#dc2626"}}>{(Array.isArray(r.cons)?r.cons:[r.cons]).map((c,j)=><div key={j}>• {c}</div>)}</td>)}</tr>
     </tbody>
   </table></div>}
 </div>}
@@ -140,25 +141,53 @@ return(
 <div style={{fontSize:12,fontWeight:700,color:"var(--accent)",letterSpacing:1,textTransform:"uppercase",marginBottom:12}}>{t("step")} 3 {t("of")} 3</div><div className="card" style={{padding:"14px 20px",marginBottom:20,display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}><Ic name={co?.icon} size={24} color="var(--accent)"/><div style={{flex:1}}><span style={{fontWeight:700,fontSize:15}}>{t(co?.tk)}</span>{sub&&<span style={{color:"var(--sub)",fontSize:14}}> · {sub}</span>}<div style={{fontSize:12,color:"var(--sub)"}}>{city&&`${city} · `}{budget&&`${budget} · `}{hh} {t("members")}</div></div></div>
 
 {activeTile&&<div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",background:"rgba(245,245,247,0.7)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:24,overflowY:"auto"}} onClick={()=>setActiveTile(null)}>
-  <div className="card" onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:600,padding:32,position:"relative",animation:"fadeUp 0.3s ease",maxHeight:"90vh",overflowY:"auto"}}>
-    <button onClick={()=>setActiveTile(null)} style={{position:"absolute",top:20,right:20,background:"#f2f2f7",border:"none",borderRadius:"50%",width:32,height:32,display:"grid",placeItems:"center",cursor:"pointer"}}><Ic name="close" size={16}/></button>
-    <div style={{fontSize:13,fontWeight:700,color:"var(--accent)",marginBottom:12}}>{activeTile.badge}</div>
-    <h2 style={{fontFamily:"inherit",fontSize:26,fontWeight:800,marginBottom:8,paddingRight:32,lineHeight:1.3}}>{activeTile.name}</h2>
-    <div style={{fontSize:24,fontWeight:800,marginBottom:24,color:"#1d1d1f"}}>₹{parseInt(activeTile.price.toString().replace(/\D/g,'')||"0").toLocaleString()}</div>
+  <div className="card" onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:640,padding:40,position:"relative",animation:"fadeUp 0.3s ease",maxHeight:"90vh",overflowY:"auto",background:"#fff"}}>
+    <button onClick={()=>setActiveTile(null)} style={{position:"absolute",top:24,right:24,background:"#f2f2f7",border:"none",borderRadius:"50%",width:36,height:36,display:"grid",placeItems:"center",cursor:"pointer"}}><Ic name="close" size={18}/></button>
     
-    <h3 style={{fontSize:16,fontWeight:700,marginBottom:8}}>Why it's recommended</h3>
-    <p style={{fontSize:15,color:"var(--sub)",lineHeight:1.6,marginBottom:24}}>{activeTile.why}</p>
+    <div style={{display:"flex", alignItems:"center", gap:16, marginBottom:20}}>
+      {activeTile.brand_domain && <img src={`https://logo.clearbit.com/${activeTile.brand_domain}`} alt="Logo" style={{width:48,height:48,objectFit:"contain",borderRadius:8}} onError={(e)=>{e.target.style.display='none'}}/>}
+      <div>
+        <div style={{fontSize:13,fontWeight:700,color:"var(--accent)",marginBottom:4}}>{activeTile.badge}</div>
+        <h2 style={{fontFamily:"inherit",fontSize:28,fontWeight:800,paddingRight:32,lineHeight:1.2}}>{activeTile.name}</h2>
+      </div>
+    </div>
     
-    <h3 style={{fontSize:16,fontWeight:700,marginBottom:10}}>Key Specifications</h3>
-    <div style={{background:"#f5f5f7",padding:"16px 20px",borderRadius:12,marginBottom:24}}>
-      {activeTile.specs.map((s,i)=><div key={i} style={{fontSize:14,color:"#48484a",marginBottom:8}}>• {s}</div>)}
+    <div style={{fontSize:28,fontWeight:800,marginBottom:24,color:"#1d1d1f"}}>₹{parseInt(activeTile.price.toString().replace(/\D/g,'')||"0").toLocaleString()}</div>
+    
+    <div style={{fontSize:15,color:"var(--sub)",lineHeight:1.6,marginBottom:24,paddingBottom:24,borderBottom:"1px solid var(--border)"}}>
+      <strong>Overview:</strong> {activeTile.summary || activeTile.why}
     </div>
 
-    <h3 style={{fontSize:16,fontWeight:700,marginBottom:8}}>Trade-offs</h3>
-    <p style={{fontSize:15,color:"#dc2626",lineHeight:1.6,marginBottom:32}}>{activeTile.cons}</p>
+    {activeTile.target && <div style={{background:"#f5f5f7",padding:"16px 20px",borderRadius:12,marginBottom:24,fontSize:14,color:"#1d1d1f",lineHeight:1.5}}>
+      <strong>🎯 Who is this for?</strong><br/><span style={{color:"var(--sub)"}}>{activeTile.target}</span>
+    </div>}
+    
+    <h3 style={{fontSize:18,fontWeight:700,marginBottom:12}}>Detailed Specifications</h3>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:32}}>
+      {Array.isArray(activeTile.specs) 
+        ? activeTile.specs.map((s,i)=><div key={i} style={{background:"#f5f5f7",padding:"12px 16px",borderRadius:10}}><div style={{fontSize:14,fontWeight:600,color:"#1d1d1f"}}>{s}</div></div>)
+        : Object.entries(activeTile.specs||{}).map(([k,v],i)=><div key={i} style={{background:"#f5f5f7",padding:"12px 16px",borderRadius:10}}><div style={{fontSize:12,color:"var(--sub)",fontWeight:600,marginBottom:2,textTransform:"uppercase",letterSpacing:0.5}}>{k}</div><div style={{fontSize:14,fontWeight:600,color:"#1d1d1f"}}>{v}</div></div>)
+      }
+    </div>
+
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,marginBottom:36}}>
+      <div>
+        <h3 style={{fontSize:16,fontWeight:700,marginBottom:12,color:"#34c759"}}>Pros</h3>
+        <ul style={{listStyle:"none",padding:0,margin:0}}>
+          {(activeTile.pros||[]).map((p,i)=><li key={i} style={{display:"flex",gap:8,fontSize:14,color:"#48484a",marginBottom:8}}><Ic name="check" size={16} color="#34c759" /> <span>{p}</span></li>)}
+        </ul>
+      </div>
+      <div>
+        <h3 style={{fontSize:16,fontWeight:700,marginBottom:12,color:"#dc2626"}}>Cons</h3>
+        <ul style={{listStyle:"none",padding:0,margin:0}}>
+          {(Array.isArray(activeTile.cons)?activeTile.cons:[activeTile.cons]).map((c,i)=><li key={i} style={{display:"flex",gap:8,fontSize:14,color:"#48484a",marginBottom:8}}><Ic name="close" size={16} color="#dc2626" /> <span>{c}</span></li>)}
+        </ul>
+      </div>
+    </div>
 
     <div style={{display:"flex",gap:12}}>
-      <button className="btn btn-p" onClick={()=>window.open(`https://www.google.com/search?q=${encodeURIComponent(activeTile.name+" buy india")}`,"_blank")} style={{flex:1,padding:"14px"}}>Search Prices Online</button>
+      <button className="btn btn-p" onClick={()=>window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(activeTile.name)}`,"_blank")} style={{flex:1,padding:"14px"}}><Ic name="camera" size={18}/> View Gallery</button>
+      <button className="btn btn-s" onClick={()=>window.open(`https://www.google.com/search?q=${encodeURIComponent(activeTile.name+" buy india")}`,"_blank")} style={{flex:1,padding:"14px"}}>Search Prices</button>
       <button className="btn btn-s" onClick={()=>togS(activeTile)} style={{width:52,padding:0,display:"grid",placeItems:"center",border:saved.find(x=>x.name===activeTile.name)?"1.5px solid var(--accent)":"1.5px solid var(--border)",background:saved.find(x=>x.name===activeTile.name)?"var(--accentBg)":"#fff"}}><Ic name="heart" size={22} color={saved.find(x=>x.name===activeTile.name)?"var(--accent)":"var(--sub)"}/></button>
     </div>
   </div>
@@ -170,11 +199,11 @@ return(
       <div style={{fontSize:12,fontWeight:700,color:"var(--accent)",marginBottom:8}}>{r.badge}</div>
       <div style={{fontWeight:700,fontSize:16,marginBottom:4,paddingRight:24}}>{r.name}</div>
       <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>₹{parseInt(r.price.toString().replace(/\D/g,'')||"0").toLocaleString()}</div>
-      <div style={{fontSize:13,color:"var(--sub)",marginBottom:12,flex:1}}>{r.why}</div>
+      <div style={{fontSize:13,color:"var(--sub)",marginBottom:12,flex:1}}>{r.summary || r.why}</div>
       <div style={{background:"#f5f5f7",padding:"10px 14px",borderRadius:8,fontSize:12,marginBottom:12}}>
-        {r.specs.slice(0,3).map((s,j)=><div key={j} style={{color:"#48484a",marginBottom:4}}>• {s}</div>)}
+        {(Array.isArray(r.specs)?r.specs:Object.entries(r.specs||{}).map(([k,v])=>`${k}: ${v}`)).slice(0,3).map((s,j)=><div key={j} style={{color:"#48484a",marginBottom:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>• {s}</div>)}
       </div>
-      <div style={{fontSize:12,color:"#dc2626",lineHeight:1.4}}><strong>Cons:</strong> {r.cons}</div>
+      <div style={{fontSize:12,color:"#dc2626",lineHeight:1.4}}><strong>Trade-offs:</strong> {Array.isArray(r.cons)?r.cons[0]:r.cons}</div>
       <button onClick={(e)=>{e.stopPropagation();togS(r);}} style={{position:"absolute",top:16,right:16,background:"transparent",border:"none",cursor:"pointer",padding:4}}><Ic name="heart" size={18} color={saved.find(x=>x.name===r.name)?"var(--accent)":"var(--border)"}/></button>
     </div>)}
   </div>
