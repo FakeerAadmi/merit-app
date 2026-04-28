@@ -161,8 +161,6 @@ export const T = {
   },
 
   mr: {
-
-  mr: {
     /* ── Nav ── */
     browse: "शोधा", lab: "लॅब", tools: "साधने",
     /* ── Hero ── */
