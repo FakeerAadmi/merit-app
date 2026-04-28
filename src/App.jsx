@@ -115,8 +115,8 @@ const renderMD = (md) => {
     const t = line.trim();
     if (!t) return <div key={i} style={{height:8}}/>;
     if (t.startsWith('### ')) return <h3 key={i} style={{fontSize:16,fontWeight:700,color:'var(--on-sur)',margin:'20px 0 8px',paddingBottom:6,borderBottom:'1px solid var(--out-v)'}}>{t.slice(4).replace(/\*\*/g,'')}</h3>;
-    if (t.startsWith('## ')) return <h2 key={i} style={{fontSize:20,fontWeight:800,color:'var(--pri)',margin:'26px 0 10px',fontFamily:'Sora,sans-serif'}}>{t.slice(3).replace(/\*\*/g,'')}</h2>;
-    if (t.startsWith('# ')) return <h1 key={i} style={{fontSize:24,fontWeight:800,margin:'20px 0 10px',fontFamily:'Sora,sans-serif'}}>{t.slice(2).replace(/\*\*/g,'')}</h1>;
+    if (t.startsWith('## ')) return <h2 key={i} style={{fontSize:20,fontWeight:800,color:'var(--pri)',margin:'26px 0 10px',fontFamily:'Outfit,sans-serif'}}>{t.slice(3).replace(/\*\*/g,'')}</h2>;
+    if (t.startsWith('# ')) return <h1 key={i} style={{fontSize:24,fontWeight:800,margin:'20px 0 10px',fontFamily:'Outfit,sans-serif'}}>{t.slice(2).replace(/\*\*/g,'')}</h1>;
     if (t.startsWith('- ') || t.startsWith('* ')) {
       const ct = t.replace(/^[-*]\s*/,'');
       const p = ct.split(/\*\*(.*?)\*\*/g);
@@ -323,7 +323,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
         <div style={{width:36,height:36,borderRadius:'var(--r-md)',background:'#DCFCE7',display:'grid',placeItems:'center'}}>
           <Ic name="shield" size={20} color="#16A34A"/>
         </div>
-        <span style={{fontSize:16,fontWeight:700,fontFamily:'Sora,sans-serif'}}>{t('scamT')}</span>
+        <span style={{fontSize:16,fontWeight:700,fontFamily:'Outfit,sans-serif'}}>{t('scamT')}</span>
       </div>
       {scam(id).map((tip,i)=>(
         <div key={i} style={{display:'flex',gap:10,marginBottom:7,fontSize:13.5,lineHeight:1.55,color:'var(--on-sur-v)'}}>
@@ -354,9 +354,9 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
         {/* Logo */}
         <div onClick={()=>{setView('home');setCatQ('');setError('');}} style={{cursor:'pointer',display:'flex',alignItems:'center',gap:9}}>
           <div style={{width:32,height:32,borderRadius:'var(--r-sm)',background:'var(--pri)',display:'grid',placeItems:'center',boxShadow:'0 2px 8px rgba(185,98,0,.35)'}}>
-            <span style={{color:'#fff',fontSize:16,fontWeight:800,fontFamily:'Sora,sans-serif',letterSpacing:-0.5}}>m</span>
+            <span style={{color:'#fff',fontSize:16,fontWeight:800,fontFamily:'Outfit,sans-serif',letterSpacing:-0.5}}>m</span>
           </div>
-          <span style={{fontFamily:'Sora,sans-serif',fontSize:21,fontWeight:800,color:'var(--on-sur)',letterSpacing:-0.8}}>merit.</span>
+          <span style={{fontFamily:'Outfit,sans-serif',fontSize:21,fontWeight:800,color:'var(--on-sur)',letterSpacing:-0.8}}>merit.</span>
         </div>
 
         {/* Centered tab pill */}
@@ -397,7 +397,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:28}}>
             <div style={{display:'flex',alignItems:'center',gap:12}}>
               <div style={{width:40,height:40,borderRadius:'var(--r-md)',background:'#FFF1F2',display:'grid',placeItems:'center'}}><Ic name="heart" size={20} color="var(--pri)"/></div>
-              <h2 style={{fontFamily:'Sora,sans-serif',fontSize:26,fontWeight:800}}>Saved Items</h2>
+              <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:26,fontWeight:800}}>Saved Items</h2>
             </div>
             {compSel.length>1&&<button className="btn btn-p" onClick={()=>setView('compare')} style={{padding:'9px 18px',fontSize:13}}>Compare {compSel.length} Items</button>}
           </div>
@@ -429,7 +429,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
           </div>
           <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:26}}>
             <div style={{width:40,height:40,borderRadius:'var(--r-md)',background:'var(--accentBg)',display:'grid',placeItems:'center'}}><Ic name="compare" size={20} color="var(--pri)"/></div>
-            <h2 style={{fontFamily:'Sora,sans-serif',fontSize:26,fontWeight:800}}>Compare Products</h2>
+            <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:26,fontWeight:800}}>Compare Products</h2>
           </div>
           {compSel.length<2
             ?<div style={{padding:48,textAlign:'center',background:'var(--sur-low)',borderRadius:'var(--r-xl)',border:'1px solid var(--out-v)'}}>
@@ -458,7 +458,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
 
         {/* ══ SETTINGS ═══════════════════════════════ */}
         {view==='settings'&&<div className="fade-up" style={{paddingTop:40}}>
-          <h2 style={{fontFamily:'Sora,sans-serif',fontSize:28,fontWeight:800,marginBottom:26}}>{t('settings')}</h2>
+          <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:28,fontWeight:800,marginBottom:26}}>{t('settings')}</h2>
           {[{label:t('gemKey'),sub:t('gemKeyD'),content:(
             <div style={{display:'flex',gap:8}}>
               <input type="password" value={apiKey} onChange={e=>{setApiKey(e.target.value);setApiSaved(false);}} placeholder="AIza..."
@@ -505,7 +505,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
                   <span style={{fontSize:13}}>✦</span>
                   <span style={{fontSize:11,fontWeight:800,color:'var(--pri)',letterSpacing:1.8,textTransform:'uppercase'}}>{t('heroTag')}</span>
                 </div>
-                <h1 className="hero-t" style={{fontFamily:'Sora,sans-serif',fontSize:46,fontWeight:800,lineHeight:1.06,marginBottom:18,letterSpacing:-1.5,color:'var(--on-sur)'}}>
+                <h1 className="hero-t" style={{fontFamily:'Outfit,sans-serif',fontSize:46,fontWeight:800,lineHeight:1.06,marginBottom:18,letterSpacing:-1.5,color:'var(--on-sur)'}}>
                   {t('heroT1')}<br/>
                   <span style={{color:'var(--pri)'}}>{t('heroT2')}<em style={{fontStyle:'italic'}}>{t('heroT2em')}</em></span>{t('heroT2dot')}
                 </h1>
@@ -544,7 +544,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
           <div style={{marginBottom:40}}>
             <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:18}}>
               <span style={{fontSize:22}}>🔥</span>
-              <h2 style={{fontFamily:'Sora,sans-serif',fontSize:22,fontWeight:800,letterSpacing:-.5}}>{t('trendTitle')}</h2>
+              <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:22,fontWeight:800,letterSpacing:-.5}}>{t('trendTitle')}</h2>
             </div>
             <div className="grid-3" style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14}}>
               {TRENDING.map((item,i)=>{
@@ -559,7 +559,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
                       </div>
                       <span style={{fontSize:11,fontWeight:700,color:cl.ic,background:'rgba(255,255,255,.7)',padding:'3px 10px',borderRadius:'var(--r-f)',backdropFilter:'blur(4px)'}}>{item.tag}</span>
                     </div>
-                    <div style={{fontWeight:800,fontSize:15,marginBottom:5,color:'var(--on-sur)',fontFamily:'Sora,sans-serif'}}>{item.label}</div>
+                    <div style={{fontWeight:800,fontSize:15,marginBottom:5,color:'var(--on-sur)',fontFamily:'Outfit,sans-serif'}}>{item.label}</div>
                     <div style={{fontSize:12.5,color:'var(--on-sur-v)',lineHeight:1.5,flex:1}}>{item.desc}</div>
                     <div style={{marginTop:14,display:'flex',alignItems:'center',gap:4,fontSize:12,fontWeight:700,color:cl.ic}}>
                       Explore <Ic name="arrow" size={12} color={cl.ic}/>
@@ -572,7 +572,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
 
           {/* Quick tools */}
           <div style={{marginBottom:40}}>
-            <h2 style={{fontFamily:'Sora,sans-serif',fontSize:22,fontWeight:800,letterSpacing:-.5,marginBottom:16}}>{t('quickTools')}</h2>
+            <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:22,fontWeight:800,letterSpacing:-.5,marginBottom:16}}>{t('quickTools')}</h2>
             <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
               {[
                 {icon:'quiz',label:t('helpDecide'),desc:'4 questions',action:()=>{setView('quiz');setQS(0);setQA([]);},bg:'#F5F3FF',ic:'#7C3AED'},
@@ -624,7 +624,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
                   <div style={{width:48,height:48,borderRadius:'var(--r-lg)',background:cl.chip,display:'grid',placeItems:'center',marginBottom:14}}>
                     <Ic name={cc.icon} size={26} color={cl.ic}/>
                   </div>
-                  <div style={{fontWeight:800,fontSize:15,marginBottom:5,fontFamily:'Sora,sans-serif',color:'var(--on-sur)'}}>{t(cc.tk)}</div>
+                  <div style={{fontWeight:800,fontSize:15,marginBottom:5,fontFamily:'Outfit,sans-serif',color:'var(--on-sur)'}}>{t(cc.tk)}</div>
                   <div style={{fontSize:12,color:'var(--on-sur-v)',lineHeight:1.5}}>{cc.sub.slice(0,3).join(' · ')}</div>
                 </div>
               );
@@ -652,7 +652,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
             </div>
             <div>
               <div style={{fontSize:11,fontWeight:800,color:c(cat).ic,letterSpacing:1.8,textTransform:'uppercase',marginBottom:4}}>{t('step')} 2 {t('of')} 3</div>
-              <h2 style={{fontFamily:'Sora,sans-serif',fontSize:24,fontWeight:800,color:'var(--on-sur)'}}>{t(co.tk)}</h2>
+              <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:24,fontWeight:800,color:'var(--on-sur)'}}>{t(co.tk)}</h2>
               <p style={{fontSize:13.5,color:'var(--on-sur-v)'}}>{t('configPrefs')}</p>
             </div>
           </div>
@@ -758,7 +758,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
                       {activeTile.buy&&<span style={{fontSize:11.5,color:'var(--on-sur-v)'}}>🛒 {activeTile.buy}</span>}
                       {activeTile.rating&&<span style={{fontSize:11.5,color:'var(--on-sur-v)'}}>⭐ {activeTile.rating}</span>}
                     </div>
-                    <h2 style={{fontSize:18,fontWeight:800,lineHeight:1.2,marginBottom:4,fontFamily:'Sora,sans-serif'}}>{activeTile.name}</h2>
+                    <h2 style={{fontSize:18,fontWeight:800,lineHeight:1.2,marginBottom:4,fontFamily:'Outfit,sans-serif'}}>{activeTile.name}</h2>
                     <div style={{fontSize:28,fontWeight:800,lineHeight:1,color:'var(--pri)'}}> ₹{parseInt(activeTile.price.toString().replace(/\D/g,'')||'0').toLocaleString()}</div>
                   </div>
                   <button onClick={()=>setActiveTile(null)} style={{background:'rgba(255,255,255,.4)',border:'1px solid rgba(255,255,255,.5)',borderRadius:'var(--r-sm)',width:34,height:34,display:'grid',placeItems:'center',cursor:'pointer',flexShrink:0,marginTop:2}}>
@@ -826,7 +826,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
                       {/* Tonal top stripe */}
                       <div style={{position:'absolute',top:0,left:0,right:0,height:4,background:cl.ic,opacity:.6,borderRadius:'var(--r-lg) var(--r-lg) 0 0'}}/>
                       <div style={{fontSize:11,fontWeight:800,color:cl.ic,marginBottom:8,marginTop:4}}>{r.badge}</div>
-                      <div style={{fontWeight:800,fontSize:15,marginBottom:4,paddingRight:28,lineHeight:1.3,fontFamily:'Sora,sans-serif'}}>{r.name}</div>
+                      <div style={{fontWeight:800,fontSize:15,marginBottom:4,paddingRight:28,lineHeight:1.3,fontFamily:'Outfit,sans-serif'}}>{r.name}</div>
                       <div style={{fontSize:22,fontWeight:800,marginBottom:10,color:'var(--pri)'}}> ₹{parseInt(r.price.toString().replace(/\D/g,'')||'0').toLocaleString()}</div>
                       <div style={{fontSize:13,color:'var(--on-sur-v)',marginBottom:12,flex:1,lineHeight:1.5}}>{r.summary||r.why}</div>
                       <div style={{background:cl.bg,padding:'10px 14px',borderRadius:'var(--r-md)',fontSize:12,marginBottom:10,border:`1px solid ${cl.chip}`}}>
@@ -845,13 +845,13 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
               <div className="card nm-flat" style={{padding:28,marginBottom:16,background:'var(--sur-low)'}}>
                 <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
                   <div style={{width:36,height:36,borderRadius:'var(--r-md)',background:'var(--accentBg)',display:'grid',placeItems:'center'}}><span style={{fontSize:18}}>🎯</span></div>
-                  <h3 style={{fontSize:17,fontWeight:800,fontFamily:'Sora,sans-serif'}}>Expert Verdict</h3>
+                  <h3 style={{fontSize:17,fontWeight:800,fontFamily:'Outfit,sans-serif'}}>Expert Verdict</h3>
                 </div>
                 <p style={{fontSize:14,lineHeight:1.7,color:'var(--on-sur-v)',marginBottom:20}}>{pR.comparison}</p>
                 {pR.insider&&<div style={{background:'var(--accentBg)',borderRadius:'var(--r-md)',padding:'13px 16px',marginBottom:20,fontSize:13.5,lineHeight:1.6,border:'1px solid rgba(185,98,0,.2)'}}>
                   <strong>💡 Insider: </strong><span style={{color:'var(--on-sur-v)'}}>{pR.insider}</span>
                 </div>}
-                <h3 style={{fontSize:15,fontWeight:800,marginBottom:10,fontFamily:'Sora,sans-serif'}}>Buying Advice</h3>
+                <h3 style={{fontSize:15,fontWeight:800,marginBottom:10,fontFamily:'Outfit,sans-serif'}}>Buying Advice</h3>
                 <div style={{display:'flex',flexDirection:'column',gap:8}}>
                   {pR.advice.map((a,i)=><div key={i} style={{display:'flex',gap:10,fontSize:13.5,color:'var(--on-sur-v)',lineHeight:1.5}}>
                     <span style={{width:22,height:22,borderRadius:'var(--r-xs)',background:'var(--accentBg)',display:'grid',placeItems:'center',flexShrink:0,fontSize:11,fontWeight:800,color:'var(--pri)'}}>{i+1}</span>
@@ -889,14 +889,14 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
           <div style={{display:'inline-flex',alignItems:'center',gap:7,padding:'5px 14px',borderRadius:'var(--r-f)',background:'rgba(185,98,0,.15)',border:'1px solid rgba(185,98,0,.3)',marginBottom:20}}>
             <span style={{fontSize:10.5,fontWeight:800,color:'var(--pri)',letterSpacing:2,textTransform:'uppercase'}}>{t('labTag')}</span>
           </div>
-          <h1 style={{fontFamily:'Sora,sans-serif',fontSize:36,fontWeight:800,color:'#F0EBE3',marginBottom:10,letterSpacing:-1}}>{t('labT')}</h1>
+          <h1 style={{fontFamily:'Outfit,sans-serif',fontSize:36,fontWeight:800,color:'#F0EBE3',marginBottom:10,letterSpacing:-1}}>{t('labT')}</h1>
           <p style={{fontSize:16,color:'var(--darkSub)',marginBottom:36,maxWidth:560}}>{t('labSub')}</p>
           <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}}>
             {[{id:'pc',ic:'pc',n:t('pcB'),d:t('pcBD'),emoji:'🖥️'},{id:'setup',ic:'setup',n:t('gsB'),d:t('gsBD'),emoji:'🎮'},{id:'theater',ic:'theater',n:t('htB'),d:t('htBD'),emoji:'🎬'}].map(m=>(
               <div key={m.id} className="card" onClick={()=>{setLabMode(m.id);setView('labConfig');setPcP({});setPcB('');setPcU('');setLabN('');setResult('');setError('');}}
                 style={{padding:26,cursor:'pointer',background:'var(--darkCard)',border:'1px solid var(--darkBorder)'}}>
                 <div style={{fontSize:36,marginBottom:16}}>{m.emoji}</div>
-                <div style={{fontWeight:800,fontSize:17,marginBottom:6,color:'#F0EBE3',fontFamily:'Sora,sans-serif'}}>{m.n}</div>
+                <div style={{fontWeight:800,fontSize:17,marginBottom:6,color:'#F0EBE3',fontFamily:'Outfit,sans-serif'}}>{m.n}</div>
                 <div style={{fontSize:13,color:'var(--darkSub)',lineHeight:1.5,marginBottom:16}}>{m.d}</div>
                 <div style={{color:'var(--pri)',fontSize:13,fontWeight:700,display:'flex',alignItems:'center',gap:4}}>{t('configure')} <Ic name="arrow" size={13} color="var(--pri)"/></div>
               </div>
@@ -907,7 +907,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
         {/* ══ LAB CONFIG ═════════════════════════════ */}
         {view==='labConfig'&&<div className="fade-up dark" style={{margin:'0 -24px',padding:'32px 24px 60px',minHeight:'80vh',background:'var(--darkBg)'}}>
           <button className="btn btn-s" onClick={()=>setView('lab')} style={{marginBottom:24,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('lab')}</button>
-          <h2 style={{fontFamily:'Sora,sans-serif',fontSize:28,fontWeight:800,color:'#F0EBE3',marginBottom:28}}>{labMode==='pc'?t('pcB'):labMode==='setup'?t('gsB'):t('htB')}</h2>
+          <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:28,fontWeight:800,color:'#F0EBE3',marginBottom:28}}>{labMode==='pc'?t('pcB'):labMode==='setup'?t('gsB'):t('htB')}</h2>
 
           {labMode==='pc'&&<div className="card" style={{padding:24,marginBottom:14,background:'var(--darkCard)',border:'1px solid var(--darkBorder)'}}>
             <label style={{fontWeight:700,fontSize:14,color:'#F0EBE3',display:'block',marginBottom:4}}>{t('partsC')}</label>
@@ -958,7 +958,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
 
         {/* ══ TOOLS ══════════════════════════════════ */}
         {view==='tools'&&<div className="fade-up" style={{paddingTop:40}}>
-          <h2 style={{fontFamily:'Sora,sans-serif',fontSize:28,fontWeight:800,marginBottom:8}}>{t('toolsT')}</h2>
+          <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:28,fontWeight:800,marginBottom:8}}>{t('toolsT')}</h2>
           <p style={{fontSize:15.5,color:'var(--on-sur-v)',marginBottom:28}}>{t('toolsSub')}</p>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
             {[{i:'quiz',n:t('hmdT'),d:t('hmdD'),bg:'#F5F3FF',ic:'#7C3AED',a:()=>{setView('quiz');setQS(0);setQA([]);setResult('');setError('');}},
@@ -970,7 +970,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
                 <div style={{width:48,height:48,borderRadius:'var(--r-lg)',background:'rgba(255,255,255,.7)',display:'grid',placeItems:'center',marginBottom:14}}>
                   <Ic name={x.i} size={26} color={x.ic}/>
                 </div>
-                <div style={{fontWeight:800,fontSize:16,marginBottom:5,fontFamily:'Sora,sans-serif'}}>{x.n}</div>
+                <div style={{fontWeight:800,fontSize:16,marginBottom:5,fontFamily:'Outfit,sans-serif'}}>{x.n}</div>
                 <div style={{fontSize:13.5,color:'var(--on-sur-v)',lineHeight:1.5}}>{x.d}</div>
               </div>
             ))}
@@ -982,7 +982,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
           <button className="btn btn-s" onClick={()=>setView('home')} style={{marginBottom:22,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('back')}</button>
           <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:10}}>
             <div style={{width:40,height:40,borderRadius:'var(--r-md)',background:'#F5F3FF',display:'grid',placeItems:'center'}}><Ic name="quiz" size={22} color="#7C3AED"/></div>
-            <h2 style={{fontFamily:'Sora,sans-serif',fontSize:26,fontWeight:800}}>{t('hmdT')}</h2>
+            <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:26,fontWeight:800}}>{t('hmdT')}</h2>
           </div>
           <p style={{color:'var(--on-sur-v)',fontSize:14,marginBottom:24}}>{t('question')} {qS+1} {t('of')} {quizQs.length}</p>
 
@@ -992,7 +992,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
           </div>
 
           <div className="card nm-flat" style={{padding:28,background:'var(--sur-low)'}}>
-            <h3 style={{fontSize:20,fontWeight:800,marginBottom:22,fontFamily:'Sora,sans-serif'}}>{quizQs[qS].q}</h3>
+            <h3 style={{fontSize:20,fontWeight:800,marginBottom:22,fontFamily:'Outfit,sans-serif'}}>{quizQs[qS].q}</h3>
             <div style={{display:'flex',flexDirection:'column',gap:9}}>
               {quizQs[qS].o.map(o=>(
                 <button key={o} className={`pill ${qA[qS]===o?'active':''}`}
@@ -1024,7 +1024,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
           <button className="btn btn-s" onClick={()=>setView('tools')} style={{marginBottom:22,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('tools')}</button>
           <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:28}}>
             <div style={{width:44,height:44,borderRadius:'var(--r-md)',background:'#FFFBEB',display:'grid',placeItems:'center'}}><Ic name="zap" size={24} color="#D97706"/></div>
-            <h2 style={{fontFamily:'Sora,sans-serif',fontSize:26,fontWeight:800}}>{t('calcT')}</h2>
+            <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:26,fontWeight:800}}>{t('calcT')}</h2>
           </div>
           <div className="card nm-flat" style={{padding:26,background:'var(--sur-low)'}}>
             {[{label:t('wattage'),val:cW,set:setCW,ph:t('wattPH'),hint:t('wattH')},
@@ -1040,7 +1040,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
             ))}
             {mC&&<div style={{background:'linear-gradient(135deg,#FFF7ED,#FFF3E0)',borderRadius:'var(--r-xl)',padding:'24px 28px',textAlign:'center',border:'1.5px solid #FDDBA8',boxShadow:'var(--nm-sm)'}}>
               <div style={{fontSize:13,color:'var(--pri)',fontWeight:700,marginBottom:6}}>{t('estMonth')}</div>
-              <div style={{fontSize:48,fontWeight:800,color:'var(--pri)',fontFamily:'Sora,sans-serif',letterSpacing:-1}}>₹{parseInt(mC).toLocaleString()}</div>
+              <div style={{fontSize:48,fontWeight:800,color:'var(--pri)',fontFamily:'Outfit,sans-serif',letterSpacing:-1}}>₹{parseInt(mC).toLocaleString()}</div>
               <div style={{fontSize:13,color:'var(--on-sur-v)',marginTop:8}}>{cW}W × {cH}hrs × 30 ÷ 1000 × ₹{cR} = <strong>₹{mC}/{t('month')}</strong></div>
               <div style={{fontSize:13,color:'var(--on-sur-v)',marginTop:4}}>{t('yearly')}: <strong>₹{(parseInt(mC)*12).toLocaleString()}</strong></div>
             </div>}
@@ -1058,7 +1058,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
           <button className="btn btn-s" onClick={()=>setView('tools')} style={{marginBottom:22,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('tools')}</button>
           <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:28}}>
             <div style={{width:44,height:44,borderRadius:'var(--r-md)',background:'#F0FDF4',display:'grid',placeItems:'center'}}><Ic name="deal" size={24} color="#16A34A"/></div>
-            <h2 style={{fontFamily:'Sora,sans-serif',fontSize:26,fontWeight:800}}>{t('dealT')}</h2>
+            <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:26,fontWeight:800}}>{t('dealT')}</h2>
           </div>
           <div className="card nm-flat" style={{padding:26,background:'var(--sur-low)'}}>
             <p style={{fontSize:14,color:'var(--on-sur-v)',marginBottom:22}}>{t('dealSub')}</p>
@@ -1093,7 +1093,7 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
               <div style={{width:54,height:54,background:'rgba(220,38,38,0.15)',borderRadius:'var(--r-f)',display:'grid',placeItems:'center',marginBottom:20}}>
                 <span style={{fontSize:24}}>🔞</span>
               </div>
-              <h3 style={{fontSize:24,fontWeight:800,marginBottom:12,color:'var(--on-sur)',fontFamily:'Sora,sans-serif'}}>Age Verification Required</h3>
+              <h3 style={{fontSize:24,fontWeight:800,marginBottom:12,color:'var(--on-sur)',fontFamily:'Outfit,sans-serif'}}>Age Verification Required</h3>
               <p style={{fontSize:14,color:'var(--on-sur-v)',lineHeight:1.6,marginBottom:28}}>This section contains products intended for adults (18+), including personal massagers and intimate wellness devices. By proceeding, you confirm that you are of legal age to view this content.</p>
               <div style={{display:'flex',gap:12}}>
                 <button className="btn" onClick={()=>setShowAgeGate(false)} style={{flex:1,padding:'14px',background:'var(--sur-low)',color:'var(--on-sur)',border:'1px solid var(--out)',fontSize:14}}>Cancel</button>

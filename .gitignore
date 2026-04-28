@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Dev artifacts
+notebooklm-source.txt
+combine_code.js
