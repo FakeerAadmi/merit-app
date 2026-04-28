@@ -789,9 +789,10 @@ Product: ${dP} | Price: ₹${dPr} | City: ${city||'India'}
                   </div>
                 </div>
                 {/* Actions */}
-                <div style={{padding:'14px 24px',borderTop:'1px solid rgba(255,255,255,.28)',display:'flex',gap:8,background:'rgba(255,255,255,.18)'}}>
-                  <button className="btn btn-p" onClick={()=>window.open(`https://www.google.com/search?q=${encodeURIComponent(activeTile.name+' buy india price')}`,'_blank')} style={{flex:1,justifyContent:'center',padding:'12px',fontSize:13}}>Search Prices</button>
-                  <button className="btn btn-s" onClick={()=>window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(activeTile.name)}`,'_blank')} style={{padding:'12px 16px',fontSize:13,borderRadius:'var(--r-f)'}}><Ic name="camera" size={15}/> Photos</button>
+                <div style={{padding:'14px 24px',borderTop:'1px solid rgba(255,255,255,.28)',display:'flex',gap:8,background:'rgba(255,255,255,.18)',flexWrap:'wrap'}}>
+                  <button className="btn" onClick={()=>window.open(`https://www.amazon.in/s?k=${encodeURIComponent(activeTile.name)}`,'_blank')} style={{flex:1,minWidth:100,justifyContent:'center',padding:'12px',fontSize:13,background:'#FF9900',color:'#111',border:'none',boxShadow:'0 2px 4px rgba(0,0,0,0.1)'}}>Amazon</button>
+                  <button className="btn" onClick={()=>window.open(`https://www.flipkart.com/search?q=${encodeURIComponent(activeTile.name)}`,'_blank')} style={{flex:1,minWidth:100,justifyContent:'center',padding:'12px',fontSize:13,background:'#2874F0',color:'#fff',border:'none',boxShadow:'0 2px 4px rgba(0,0,0,0.1)'}}>Flipkart</button>
+                  <button className="btn btn-s" onClick={()=>window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(activeTile.name)}`,'_blank')} style={{padding:'12px 14px',fontSize:13,borderRadius:'var(--r-f)'}}><Ic name="camera" size={15}/></button>
                   <button className="btn btn-s" onClick={()=>togS(activeTile)} style={{width:44,height:44,padding:0,display:'grid',placeItems:'center',background:saved.find(x=>x.name===activeTile.name)?'var(--pri-c)':'rgba(255,255,255,.3)',borderRadius:'var(--r-md)'}}>
                     <Ic name="heart" size={18} color={saved.find(x=>x.name===activeTile.name)?'var(--on-pri-c)':'var(--on-sur-v)'}/>
                   </button>
