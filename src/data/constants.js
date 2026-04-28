@@ -21,6 +21,7 @@ export const CATS = [
   {id:"vacuum",   icon:"smart",   tk:"cat_va", sub:["Robot Vacuum","Stick Vacuum","Wet & Dry Vacuum","Handheld Vacuum","Bagless Vacuum"]},
   {id:"storage",  icon:"storage", tk:"cat_st", sub:["External SSD","External HDD","Power Bank","UPS / Inverter","NAS Drive","USB Hub","Portable Charger"]},
   {id:"ebike",    icon:"zap",     tk:"cat_eb", sub:["Electric Scooter","Electric Cycle","E-Bike","EV Accessories","Portable EV Charger"]},
+  {id:"adult",    icon:"heart",   tk:"cat_ad", sub:["Personal Massager","Couples Tech","Kegel Exerciser","Lube Warmer","Intimate Wearable"]},
 ];
 
 /* ─── All priority IDs — l/d are i18n keys ─── */
@@ -98,6 +99,10 @@ export const PRIS = [
   // Tablet
   {id:"parental",    l:"pri_parental",    d:"pri_parental_d"},
   {id:"pressure",    l:"pri_pressure",    d:"pri_pressure_d"},
+  // Adult / Wellness
+  {id:"body_safe",   l:"pri_body_safe",   d:"pri_body_safe_d"},
+  {id:"discreet",    l:"pri_discreet",    d:"pri_discreet_d"},
+  {id:"vibration",   l:"pri_vibration",   d:"pri_vibration_d"},
 ];
 
 export const BUD = {
@@ -123,6 +128,7 @@ export const BUD = {
   smart:["Under ₹2K","₹2K–5K","₹5K–15K","₹15K+"],
   health:["Under ₹1K","₹1K–3K","₹3K–8K","₹8K–20K","₹20K+"],
   tablet:["Under ₹10K","₹10K–20K","₹20K–40K","₹40K–70K","₹70K+"],
+  adult:["Under ₹2K","₹2K–5K","₹5K–10K","₹10K+"],
   default:["Budget","Mid-Range","Premium","Ultra Premium"],
 };
 
@@ -436,6 +442,18 @@ export const CAT_CONF = {
       "E-Bike":              {pris:["range","perf","quality","safety","brand","price"],             bud:["₹60K–1L","₹1L–1.5L","₹1.5L+"]},
       "EV Accessories":      {pris:["quality","connectivity","safety","ease","brand","price"],      bud:["Under ₹2K","₹2K–8K","₹8K+"]},
       "Portable EV Charger": {pris:["charging","portability","safety","brand","price","quality"],   bud:["Under ₹5K","₹5K–15K","₹15K+"]},
+    }
+  },
+
+  adult: {
+    hasHH: false,
+    pris: ["body_safe","discreet","vibration","waterproof","quality","price"],
+    sub: {
+      "Personal Massager": {pris:["vibration","body_safe","quiet","waterproof","brand","price"],     bud:["Under ₹2K","₹2K–5K","₹5K–10K","₹10K+"]},
+      "Couples Tech":      {pris:["smart","vibration","body_safe","quiet","brand","price"],          bud:["Under ₹3K","₹3K–6K","₹6K–12K","₹12K+"]},
+      "Kegel Exerciser":   {pris:["smart","body_safe","health_track","waterproof","quality","price"],bud:["Under ₹2K","₹2K–5K","₹5K+"]},
+      "Lube Warmer":       {pris:["ease","capacity","safety","brand","price","design"],              bud:["Under ₹1K","₹1K–3K","₹3K+"]},
+      "Intimate Wearable": {pris:["discreet","vibration","smart","quiet","body_safe","price"],       bud:["Under ₹3K","₹3K–7K","₹7K+"]},
     }
   },
 };

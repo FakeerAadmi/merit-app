@@ -147,8 +147,8 @@ export const T = {
     wCeil:"Ceiling Fan", wTv:'LED TV 43"', wFr:"Fridge",
     wAc1:"1-ton AC", wAc15:"1.5-ton AC", wGey:"Geyser",
     wWash:"Washing Machine", wMic:"Microwave",
-    /* ── New category keys ── */
-    cat_mo:"Monitors", cat_pu:"Air Purifiers", cat_va:"Vacuum Cleaners", cat_eb:"Electric Vehicles",
+    /* ── New categories ── */
+    cat_mo:"Monitors", cat_pu:"Air Purifiers", cat_va:"Vacuum Cleaners", cat_eb:"Electric Vehicles", cat_ad:"Intimate Wellness",
     /* ── Existing extended priorities ── */
     pri_refresh:"Refresh Rate",    pri_refresh_d:"Hz & response time",
     pri_filter:"Filtration",       pri_filter_d:"HEPA & purification grade",
@@ -188,6 +188,10 @@ export const T = {
     pri_charging:"Charging Speed", pri_charging_d:"Fast charge wattage & time",
     pri_safety:"Safety Rating",    pri_safety_d:"Certifications & protection features",
     pri_parental:"Parental Controls", pri_parental_d:"Content filtering & screen time",
+    /* ── Adult / Wellness ── */
+    pri_body_safe:"Body Safe",     pri_body_safe_d:"Medical grade silicone & materials",
+    pri_discreet:"Discreet",       pri_discreet_d:"Quiet & unassuming design",
+    pri_vibration:"Vibration",     pri_vibration_d:"Patterns, intensity & motor strength",
   },
 
   mr: {
@@ -339,7 +343,7 @@ export const T = {
     wAc1:"१-टन AC", wAc15:"१.५-टन AC", wGey:"गिझर",
     wWash:"वॉशिंग मशीन", wMic:"मायक्रोवेव्ह",
     /* ── New categories ── */
-    cat_mo:"मॉनिटर", cat_pu:"एअर प्युरिफायर", cat_va:"व्हॅक्युम क्लिनर", cat_eb:"इलेक्ट्रिक वाहने",
+    cat_mo:"मॉनिटर", cat_pu:"एअर प्युरिफायर", cat_va:"व्हॅक्युम क्लिनर", cat_eb:"इलेक्ट्रिक वाहने", cat_ad:"इंटिमेट वेलनेस",
     /* ── Existing extended priorities ── */
     pri_refresh:"रिफ्रेश रेट",    pri_refresh_d:"Hz आणि रिस्पॉन्स टाइम",
     pri_filter:"फिल्ट्रेशन",       pri_filter_d:"HEPA आणि शुद्धीकरण",
@@ -379,5 +383,9 @@ export const T = {
     pri_charging:"चार्जिंग स्पीड",     pri_charging_d:"फास्ट चार्ज वॅटेज आणि वेळ",
     pri_safety:"सुरक्षा रेटिंग",       pri_safety_d:"प्रमाणपत्रे आणि संरक्षण वैशिष्ट्ये",
     pri_parental:"पालक नियंत्रणे",     pri_parental_d:"कंटेंट फिल्टरिंग आणि स्क्रीन वेळ",
+    /* ── Adult / Wellness ── */
+    pri_body_safe:"बॉडी सेफ",          pri_body_safe_d:"मेडिकल ग्रेड सिलिकॉन",
+    pri_discreet:"डिसक्रीट",           pri_discreet_d:"शांत आणि गुप्त डिझाइन",
+    pri_vibration:"व्हायब्रेशन",        pri_vibration_d:"पॅटर्न आणि तीव्रता",
   }
 };
