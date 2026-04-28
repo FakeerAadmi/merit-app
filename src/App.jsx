@@ -222,7 +222,7 @@ RESPOND ONLY with valid JSON. No markdown, no code fences:
         onSettings={() => navigate('/settings')}
       />
 
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px 80px' }}>
+      <div className="page-wrap">
         <Routes>
           <Route path="/" element={
             <HomeView t={t} navigate={nav}
