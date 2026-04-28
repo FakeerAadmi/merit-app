@@ -4,9 +4,9 @@ import ErrorBanner from '../components/ErrorBanner';
 import Loader from '../components/Loader';
 import { PCP } from '../data/constants';
 
-const LabConfigView = ({ t, lang, labMode, pcP, setPcP, pcB, setPcB, pcU, setPcU, labN, setLabN, loading, error, getLabR, setView }) => (
+const LabConfigView = ({ t, lang, labMode, pcP, setPcP, pcB, setPcB, pcU, setPcU, labN, setLabN, loading, error, getLabR, navigate }) => (
   <div className="fade-up dark" style={{margin:'0 -24px',padding:'32px 24px 60px',minHeight:'80vh',background:'var(--darkBg)'}}>
-    <button className="btn btn-s" onClick={()=>setView('lab')} style={{marginBottom:24,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('lab')}</button>
+    <button className="btn btn-s" onClick={()=>navigate('/lab')} style={{marginBottom:24,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('lab')}</button>
     <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:28,fontWeight:800,color:'#F0EBE3',marginBottom:28}}>{labMode==='pc'?t('pcB'):labMode==='setup'?t('gsB'):t('htB')}</h2>
 
     {labMode==='pc'&&<div className="card" style={{padding:24,marginBottom:14,background:'var(--darkCard)',border:'1px solid var(--darkBorder)'}}>

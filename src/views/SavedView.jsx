@@ -1,14 +1,14 @@
 import React from 'react';
 import { Ic } from '../components/Icons';
 
-const SavedView = ({ saved, compSel, togC, togS, setView }) => (
+const SavedView = ({ saved, compSel, togC, togS, navigate }) => (
   <div className="fade-up" style={{paddingTop:40}}>
     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:28}}>
       <div style={{display:'flex',alignItems:'center',gap:12}}>
         <div style={{width:40,height:40,borderRadius:'var(--r-md)',background:'#FFF1F2',display:'grid',placeItems:'center'}}><Ic name="heart" size={20} color="var(--pri)"/></div>
         <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:26,fontWeight:800}}>Saved Items</h2>
       </div>
-      {compSel.length>1&&<button className="btn btn-p" onClick={()=>setView('compare')} style={{padding:'9px 18px',fontSize:13}}>Compare {compSel.length} Items</button>}
+      {compSel.length>1&&<button className="btn btn-p" onClick={()=>navigate('/compare')} style={{padding:'9px 18px',fontSize:13}}>Compare {compSel.length} Items</button>}
     </div>
     {saved.length===0
       ?<div style={{padding:56,textAlign:'center',background:'var(--sur-low)',borderRadius:'var(--r-xl)',border:'1px solid var(--out-v)'}}>

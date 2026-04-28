@@ -1,10 +1,10 @@
 import React from 'react';
 import { Ic } from '../components/Icons';
 
-const CompareView = ({ compSel, setView }) => (
+const CompareView = ({ compSel, navigate }) => (
   <div className="fade-up" style={{paddingTop:40}}>
     <div style={{display:'flex',gap:8,marginBottom:22}}>
-      <button className="btn btn-s" onClick={()=>setView('saved')} style={{fontSize:13,padding:'8px 16px'}}><Ic name="back" size={14}/> Back</button>
+      <button className="btn btn-s" onClick={()=>navigate('/saved')} style={{fontSize:13,padding:'8px 16px'}}><Ic name="back" size={14}/> Back</button>
     </div>
     <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:26}}>
       <div style={{width:40,height:40,borderRadius:'var(--r-md)',background:'var(--accentBg)',display:'grid',placeItems:'center'}}><Ic name="compare" size={20} color="var(--pri)"/></div>
@@ -13,7 +13,7 @@ const CompareView = ({ compSel, setView }) => (
     {compSel.length<2
       ?<div style={{padding:48,textAlign:'center',background:'var(--sur-low)',borderRadius:'var(--r-xl)',border:'1px solid var(--out-v)'}}>
          <p style={{fontSize:14,color:'var(--on-sur-v)',marginBottom:20}}>Select at least 2 products from Saved to compare.</p>
-         <button className="btn btn-p" onClick={()=>setView('saved')}>Go to Saved</button>
+         <button className="btn btn-p" onClick={()=>navigate('/saved')}>Go to Saved</button>
        </div>
       :<div style={{overflowX:'auto'}}>
         <table style={{width:'100%',minWidth:560,borderCollapse:'collapse',background:'var(--card)',borderRadius:'var(--r-xl)',overflow:'hidden',boxShadow:'var(--nm-md)'}}>

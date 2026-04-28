@@ -4,13 +4,13 @@ import ErrorBanner from '../components/ErrorBanner';
 import Loader from '../components/Loader';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 
-const QuizView = ({ t, view, setView, qS, setQS, qA, setQA, quizQs, loading, error, runQ, result }) => {
-  if (view === 'quizResult') {
+const QuizView = ({ t, isResult, navigate, qS, setQS, qA, setQA, quizQs, loading, error, runQ, result }) => {
+  if (isResult) {
     return (
       <div className="fade-up" style={{paddingTop:28}}>
         <div style={{display:'flex',gap:8,marginBottom:20}}>
-          <button className="btn btn-s" onClick={()=>{setView('quiz');setQS(0);}} style={{fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('retake')}</button>
-          <button className="btn btn-s" onClick={()=>setView('home')} style={{fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}>{t('browseAll')}</button>
+          <button className="btn btn-s" onClick={()=>{navigate('/quiz');setQS(0);}} style={{fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('retake')}</button>
+          <button className="btn btn-s" onClick={()=>navigate('/')} style={{fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}>{t('browseAll')}</button>
         </div>
         <div className="card nm-flat" style={{padding:'28px 26px',lineHeight:1.75}}><MarkdownRenderer content={result}/></div>
       </div>
@@ -19,7 +19,7 @@ const QuizView = ({ t, view, setView, qS, setQS, qA, setQA, quizQs, loading, err
 
   return (
     <div className="fade-up" style={{paddingTop:40}}>
-      <button className="btn btn-s" onClick={()=>setView('home')} style={{marginBottom:22,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('back')}</button>
+      <button className="btn btn-s" onClick={()=>navigate('/')} style={{marginBottom:22,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('back')}</button>
       <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:10}}>
         <div style={{width:40,height:40,borderRadius:'var(--r-md)',background:'#F5F3FF',display:'grid',placeItems:'center'}}><Ic name="quiz" size={22} color="#7C3AED"/></div>
         <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:26,fontWeight:800}}>{t('hmdT')}</h2>

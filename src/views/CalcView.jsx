@@ -1,9 +1,9 @@
 import React from 'react';
 import { Ic } from '../components/Icons';
 
-const CalcView = ({ t, cW, setCW, cH, setCH, cR, setCR, mC, wts, setView }) => (
+const CalcView = ({ t, navigate, cW, setCW, cH, setCH, cR, setCR, mC, wts }) => (
   <div className="fade-up" style={{paddingTop:40}}>
-    <button className="btn btn-s" onClick={()=>setView('tools')} style={{marginBottom:22,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('tools')}</button>
+    <button className="btn btn-s" onClick={()=>navigate('/tools')} style={{marginBottom:22,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('tools')}</button>
     <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:28}}>
       <div style={{width:44,height:44,borderRadius:'var(--r-md)',background:'#FFFBEB',display:'grid',placeItems:'center'}}><Ic name="zap" size={24} color="#D97706"/></div>
       <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:26,fontWeight:800}}>{t('calcT')}</h2>

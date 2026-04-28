@@ -3,7 +3,7 @@ import { Ic } from '../components/Icons';
 import HeroArt from '../components/HeroArt';
 import { getCatColor } from '../utils/catColors';
 
-const HomeView = ({ t, setView, setCat, setSub, setPris, setBudget, setNotes, setResult, setError, setShowT, setQS, setQA, apiSaved, TRENDING }) => {
+const HomeView = ({ t, navigate, setCat, setSub, setPris, setBudget, setNotes, setResult, setError, setShowT, setQS, setQA, apiSaved, TRENDING }) => {
   const c = getCatColor;
   return (
     <div className="fade-up">
@@ -28,10 +28,10 @@ const HomeView = ({ t, setView, setCat, setSub, setPris, setBudget, setNotes, se
             </h1>
             <p style={{fontSize:16,color:'var(--on-sur-v)',maxWidth:400,lineHeight:1.65,marginBottom:36}}>{t('heroSub')}</p>
             <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-              <button className="btn btn-p" onClick={()=>{setView('quiz');setQS(0);setQA([]);}} style={{fontSize:15.5,padding:'14px 32px'}}>
+              <button className="btn btn-p" onClick={()=>{navigate('/quiz');setQS(0);setQA([]);}} style={{fontSize:15.5,padding:'14px 32px'}}>
                 {t('helpDecide')} →
               </button>
-              <button className="btn btn-s" onClick={()=>setView('browse')} style={{fontSize:14.5,padding:'14px 24px',borderRadius:'var(--r-f)'}}>
+              <button className="btn btn-s" onClick={()=>navigate('/browse')} style={{fontSize:14.5,padding:'14px 24px',borderRadius:'var(--r-f)'}}>
                 {t('browseAllCta')}
               </button>
             </div>
@@ -53,7 +53,7 @@ const HomeView = ({ t, setView, setCat, setSub, setPris, setBudget, setNotes, se
             <div style={{fontWeight:700,fontSize:14}}>{t('oneTime')}</div>
             <div style={{fontSize:13,color:'var(--on-sur-v)'}}>{t('oneTimeD')}</div>
           </div>
-          <button className="btn btn-p" onClick={()=>setView('settings')} style={{padding:'9px 20px',fontSize:13}}>{t('setUp')}</button>
+          <button className="btn btn-p" onClick={()=>navigate('/settings')} style={{padding:'9px 20px',fontSize:13}}>{t('setUp')}</button>
         </div>
       )}
 
@@ -68,7 +68,7 @@ const HomeView = ({ t, setView, setCat, setSub, setPris, setBudget, setNotes, se
             const cl=c(item.cat);
             return(
               <div key={item.cat} className="cat-card"
-                onClick={()=>{setCat(item.cat);setView('configure');setSub('');setPris([]);setBudget('');setNotes('');setResult('');setError('');setShowT(false);}}
+                onClick={()=>{setCat(item.cat);navigate('/configure');setSub('');setPris([]);setBudget('');setNotes('');setResult('');setError('');setShowT(false);}}
                 style={{padding:'22px 20px',background:cl.bg,animation:`fadeUp .5s var(--ease) ${i*.06}s both`,display:'flex',flexDirection:'column'}}>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14}}>
                   <div style={{width:44,height:44,borderRadius:'var(--r-md)',background:cl.chip,display:'grid',placeItems:'center'}}>
@@ -92,9 +92,9 @@ const HomeView = ({ t, setView, setCat, setSub, setPris, setBudget, setNotes, se
         <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:22,fontWeight:800,letterSpacing:-.5,marginBottom:16}}>{t('quickTools')}</h2>
         <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
           {[
-            {icon:'quiz',label:t('helpDecide'),desc:'4 questions',action:()=>{setView('quiz');setQS(0);setQA([]);},bg:'#F5F3FF',ic:'#7C3AED'},
-            {icon:'calc',label:t('elecCost'),desc:'Monthly cost',action:()=>setView('calc'),bg:'#FFF7ED',ic:'#D97706'},
-            {icon:'deal',label:t('goodDeal'),desc:'Price verify',action:()=>{setView('dealCheck');},bg:'#F0FDF4',ic:'#16A34A'},
+            {icon:'quiz',label:t('helpDecide'),desc:'4 questions',action:()=>{navigate('/quiz');setQS(0);setQA([]);},bg:'#F5F3FF',ic:'#7C3AED'},
+            {icon:'calc',label:t('elecCost'),desc:'Monthly cost',action:()=>navigate('/calc'),bg:'#FFF7ED',ic:'#D97706'},
+            {icon:'deal',label:t('goodDeal'),desc:'Price verify',action:()=>navigate('/deal'),bg:'#F0FDF4',ic:'#16A34A'},
           ].map(tool=>(
             <button key={tool.label} onClick={tool.action}
               style={{padding:'16px 20px',display:'flex',alignItems:'center',gap:12,cursor:'pointer',flexShrink:0,background:tool.bg,border:'1.5px solid transparent',borderRadius:'var(--r-xl)',fontFamily:'inherit',transition:'all .25s var(--spring)',boxShadow:'var(--nm-sm)'}}

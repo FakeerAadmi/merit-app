@@ -1,9 +1,8 @@
 import React from 'react';
 import { Ic } from '../components/Icons';
 import { getCatColor } from '../utils/catColors';
-import { T } from '../data/i18n';
 
-const BrowseView = ({ t, lang, catQ, setCatQ, fCa, setCat, setView, setSub, setPris, setBudget, setNotes, setResult, setError, setShowT }) => {
+const BrowseView = ({ t, lang, catQ, setCatQ, fCa, setCat, navigate, setSub, setPris, setBudget, setNotes, setResult, setError, setShowT }) => {
   const c = getCatColor;
   return (
     <div className="fade-up" style={{paddingTop:32}}>
@@ -17,7 +16,7 @@ const BrowseView = ({ t, lang, catQ, setCatQ, fCa, setCat, setView, setSub, setP
           const cl=c(cc.id);
           return(
             <div key={cc.id} className="cat-card"
-              onClick={()=>{setCat(cc.id);setView('configure');setSub('');setPris([]);setBudget('');setNotes('');setResult('');setError('');setShowT(false);}}
+              onClick={()=>{setCat(cc.id);navigate('/configure');setSub('');setPris([]);setBudget('');setNotes('');setResult('');setError('');setShowT(false);}}
               style={{padding:'22px 20px',background:cl.bg,animation:`fadeUp .45s var(--ease) ${i*.025}s both`,display:'flex',flexDirection:'column'}}>
               <div style={{width:48,height:48,borderRadius:'var(--r-lg)',background:cl.chip,display:'grid',placeItems:'center',marginBottom:14}}>
                 <Ic name={cc.icon} size={26} color={cl.ic}/>

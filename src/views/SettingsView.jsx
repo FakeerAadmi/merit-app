@@ -2,7 +2,7 @@ import React from 'react';
 import { Ic } from '../components/Icons';
 import CityInput from '../components/CityInput';
 
-const SettingsView = ({ t, lang, setL, apiKey, setApiKey, apiSaved, saveK, setView, adultMode, setAdultMode, setShowAgeGate, cityQ, setCityQ, showCD, setShowCD, selC, fCi }) => (
+const SettingsView = ({ t, lang, setL, apiKey, setApiKey, apiSaved, saveK, navigate, adultMode, setAdultMode, setShowAgeGate, cityQ, setCityQ, showCD, setShowCD, selC, fCi }) => (
   <div className="fade-up" style={{paddingTop:40}}>
     <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:28,fontWeight:800,marginBottom:26}}>{t('settings')}</h2>
     {[
@@ -34,7 +34,7 @@ const SettingsView = ({ t, lang, setL, apiKey, setApiKey, apiSaved, saveK, setVi
         {sec.content}
       </div>
     ))}
-    <button className="btn btn-s" onClick={()=>setView('home')} style={{marginTop:8}}><Ic name="back" size={16}/> {t('back')}</button>
+    <button className="btn btn-s" onClick={()=>navigate('/')} style={{marginTop:8}}><Ic name="back" size={16}/> {t('back')}</button>
   </div>
 );
 

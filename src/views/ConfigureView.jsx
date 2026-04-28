@@ -6,11 +6,11 @@ import ScamBox from '../components/ScamBox';
 import { getCatColor } from '../utils/catColors';
 import { PRIS } from '../data/constants';
 
-const ConfigureView = ({ t, lang, cat, co, conf, sub, setSub, pris, togP, budget, setBudget, bds, hh, setHh, showHH, notes, setNotes, error, loading, getRec, setView, setCatQ, setShowT, city }) => {
+const ConfigureView = ({ t, lang, cat, co, conf, sub, setSub, pris, togP, budget, setBudget, bds, hh, setHh, showHH, notes, setNotes, error, loading, getRec, navigate, setCatQ, setShowT, city }) => {
   const c = getCatColor;
   return (
     <div className="fade-up" style={{paddingTop:28}}>
-      <button className="btn btn-s" onClick={()=>{setView('browse');setCatQ('');}} style={{marginBottom:22,padding:'8px 16px',fontSize:13,borderRadius:'var(--r-f)'}}>
+      <button className="btn btn-s" onClick={()=>{navigate('/browse');setCatQ('');}} style={{marginBottom:22,padding:'8px 16px',fontSize:13,borderRadius:'var(--r-f)'}}>
         <Ic name="back" size={14}/> {t('allCats')}
       </button>
 

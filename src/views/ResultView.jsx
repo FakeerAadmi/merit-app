@@ -6,14 +6,14 @@ import MarkdownRenderer from '../components/MarkdownRenderer';
 import { getCatColor } from '../utils/catColors';
 import { TERMO } from '../data/terminology';
 
-const ResultView = ({ t, lang, cat, co, sub, budget, hh, city, pR, result, activeTile, setActiveTile, togS, saved, setView, setCatQ, showT, setShowT, rR, error }) => {
+const ResultView = ({ t, lang, cat, co, sub, budget, hh, city, pR, result, activeTile, setActiveTile, togS, saved, navigate, setCatQ, showT, setShowT, rR, error }) => {
   const c = getCatColor;
   const termos = TERMO[cat] || TERMO.default || [];
   return (
     <div ref={rR} className="fade-up" style={{paddingTop:28}}>
       <div style={{display:'flex',gap:8,marginBottom:20}}>
-        <button className="btn btn-s" onClick={()=>setView('configure')} style={{fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('adjust')}</button>
-        <button className="btn btn-s" onClick={()=>{setView('home');setCatQ('');}} style={{fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}>{t('newSearch')}</button>
+        <button className="btn btn-s" onClick={()=>navigate('/configure')} style={{fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('adjust')}</button>
+        <button className="btn btn-s" onClick={()=>{navigate('/');setCatQ('');}} style={{fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}>{t('newSearch')}</button>
       </div>
 
       {/* Context chip */}

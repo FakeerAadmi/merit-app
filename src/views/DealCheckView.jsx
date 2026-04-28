@@ -4,12 +4,12 @@ import ErrorBanner from '../components/ErrorBanner';
 import Loader from '../components/Loader';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 
-const DealCheckView = ({ t, view, dP, setDP, dPr, setDPr, loading, error, chkD, result, setView }) => {
-  if (view === 'dealResult') {
+const DealCheckView = ({ t, isResult, navigate, dP, setDP, dPr, setDPr, loading, error, chkD, result }) => {
+  if (isResult) {
     return (
       <div className="fade-up" style={{paddingTop:28}}>
         <div style={{display:'flex',gap:8,marginBottom:20}}>
-          <button className="btn btn-s" onClick={()=>setView('dealCheck')} style={{fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('checkAn')}</button>
+          <button className="btn btn-s" onClick={()=>navigate('/deal')} style={{fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('checkAn')}</button>
         </div>
         <div style={{background:'var(--sur-low)',borderRadius:'var(--r-xl)',padding:'14px 20px',marginBottom:16,display:'flex',alignItems:'center',gap:10,border:'1px solid var(--out-v)'}}>
           <Ic name="deal" size={18} color="var(--pri)"/>
@@ -22,7 +22,7 @@ const DealCheckView = ({ t, view, dP, setDP, dPr, setDPr, loading, error, chkD, 
 
   return (
     <div className="fade-up" style={{paddingTop:40}}>
-      <button className="btn btn-s" onClick={()=>setView('tools')} style={{marginBottom:22,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('tools')}</button>
+      <button className="btn btn-s" onClick={()=>navigate('/tools')} style={{marginBottom:22,fontSize:13,padding:'8px 16px',borderRadius:'var(--r-f)'}}><Ic name="back" size={14}/> {t('tools')}</button>
       <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:28}}>
         <div style={{width:44,height:44,borderRadius:'var(--r-md)',background:'#F0FDF4',display:'grid',placeItems:'center'}}><Ic name="deal" size={24} color="#16A34A"/></div>
         <h2 style={{fontFamily:'Outfit,sans-serif',fontSize:26,fontWeight:800}}>{t('dealT')}</h2>
