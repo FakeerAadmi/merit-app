@@ -149,48 +149,234 @@ export default function App() {
   /* ─── Get recommendations ──────────────────── */
   const getRec = () => {
     const pl = pris.map((p, i) => `${i + 1}. ${t(PRIS.find(o => o.id === p)?.l)}`).join(', ');
-    const pr = `You are merit. — India's most trusted, unbiased home tech advisor.
+    const pr = `You are merit. — India's most trusted, unbiased home tech advisor with deep knowledge of the Indian market in 2025-2026.
 
-Request: Best ${sub || ''} ${t(co?.tk)} recommendation
-City: ${city || 'India'} ${showHH ? `| Household: ${hh} members` : ''}
-Budget: ${budget || 'Flexible'} | Priorities: ${pl || 'None'} | Notes: ${notes || 'None'}
+CONTEXT:
+- Product: ${sub ? sub + ' ' : ''}${t(co?.tk)}
+- City/Climate: ${city || 'India (general)'}
+- Household: ${showHH ? hh + ' members' : 'N/A'}
+- Budget: ${budget || 'Flexible — recommend across price points'}
+- User priorities (ranked): ${pl || 'Not specified'}
+- Special notes: ${notes || 'None'}
 
-Provide exactly 6 unbiased product recommendations (2 exact match, 2 best all-rounders, 2 alternatives/wildcards).
-Respond ONLY with valid JSON — no markdown, no code fences:
+TASK: Provide exactly 6 unbiased, deeply researched product recommendations for the Indian market.
+- Rec 1-2: Best matches for stated priorities and budget
+- Rec 3-4: Best all-round value picks regardless of budget
+- Rec 5-6: Bold alternatives / wildcard picks (different brand, newer tech, or budget-friendly sleeper)
+
+RESPOND ONLY with valid JSON. No markdown. No code fences. No extra text:
 {
   "recs": [
     {
-      "name": "Brand Model Number",
-      "price": "45000",
-      "badge": "🏆 Best Value",
-      "summary": "2-sentence overview of why this product stands out in 2025 India market",
-      "specs": ["Spec 1: value", "Spec 2: value", "Spec 3: value", "Spec 4: value", "Spec 5: value"],
-      "pros": ["Clear strength 1", "Clear strength 2", "Clear strength 3"],
-      "cons": ["Real limitation 1", "Real limitation 2"],
-      "target": "Best suited for households/users who...",
-      "buy": "Amazon / Flipkart / Brand Store",
-      "brand_domain": "samsung.com"
+      "name": "Exact Brand Model Full Name as sold in India",
+      "price": "numeric price in INR (e.g. 45000)",
+      "badge": "emoji + 3-word label (e.g. 🏆 Best Overall)",
+      "summary": "2-3 sentence expert overview: why this product stands out in the Indian context, climate considerations if relevant, and how it matches the stated priorities",
+      "specs": [
+        "Key Spec 1: detailed value with unit",
+        "Key Spec 2: detailed value with unit",
+        "Key Spec 3: detailed value with unit",
+        "Key Spec 4: detailed value with unit",
+        "Key Spec 5: detailed value with unit",
+        "Key Spec 6: detailed value with unit"
+      ],
+      "pros": [
+        "Specific, concrete strength with real-world impact",
+        "Second specific strength",
+        "Third specific strength"
+      ],
+      "cons": [
+        "Honest, specific limitation buyers should know",
+        "Second real limitation"
+      ],
+      "target": "Ideal for: specific user type or household scenario in 20 words",
+      "buy": "Best platform: Amazon / Flipkart / Brand store / Croma / Reliance Digital",
+      "brand_domain": "brand.com (for logo, e.g. samsung.com)",
+      "warranty": "Warranty details as sold in India",
+      "rating": "Market reception: e.g. 4.3/5 based on 2000+ reviews"
     }
   ],
-  "advice": ["Practical buying tip 1", "Practical buying tip 2", "Practical buying tip 3"],
-  "comparison": "2-3 sentence expert verdict comparing the top options.",
-  "insider": "One insider fact dealers won't proactively tell you about this product category."
+  "advice": [
+    "Specific, actionable buying tip 1 for Indian buyers",
+    "Specific, actionable buying tip 2",
+    "Specific, actionable buying tip 3",
+    "Specific, actionable buying tip 4"
+  ],
+  "comparison": "3-4 sentence expert verdict comparing the top options. Mention which is the clear winner for which type of buyer.",
+  "insider": "One non-obvious insider fact about this product category in India that dealers rarely disclose — pricing tactics, common upsells to avoid, seasonal price drops, warranty traps, etc."
 }`;
     callAI(pr).then(() => { setView('result'); setTimeout(() => rR.current?.scrollIntoView({ behavior: 'smooth' }), 100); });
   };
 
   const getLabR = () => {
     const ps = Object.entries(pcP).filter(([, v]) => v).map(([k, v]) => `${PCP.find(p => p.id === k)?.n}: ${v}`).join('\n');
-    const pr = labMode === 'pc'
-      ? `PC Build advisor. Budget: ${pcB || 'Flexible'}, Use: ${pcU || 'General'}\nParts:\n${ps || 'None'}\nNotes: ${labN || 'None'}\n\nProvide: Build Analysis, Recommended Build (₹ prices), Compatibility Check, Performance Estimates, Upgrade Path, Where to Buy, Pro Tips`
-      : labMode === 'setup'
-        ? `Gaming setup advisor. Budget: ${pcB || 'Flexible'}, Use: ${pcU || 'General'}\nNotes: ${labN || 'None'}\n\nRecommend complete setup with ₹ prices.`
-        : `Home theater advisor. Budget: ${pcB || 'Flexible'}, Room: ${labN || 'Not specified'}\n\nRecommend TV/audio/streaming with ₹ prices.`;
-    callAI(`You are merit. Lab — advanced advisor. Do DEEP research.\n\n${pr}`).then(() => { setView('labResult'); setTimeout(() => rR.current?.scrollIntoView({ behavior: 'smooth' }), 100); });
+
+    const labPrompts = {
+      pc: `You are merit. Lab — India's most advanced PC build advisor. Conduct DEEP, expert-level research.
+
+PC BUILD REQUEST:
+- Total Budget: ${pcB || 'Flexible'}
+- Primary Use: ${pcU || 'General purpose'}
+- Parts already chosen by user:
+${ps || '  (None — suggest a complete build from scratch)'}
+- Additional notes: ${labN || 'None'}
+
+Provide a comprehensive, structured PC build analysis. Use ## headers for each section:
+
+## Build Overview
+Executive summary: what kind of build this is and what performance level to expect.
+
+## Recommended Parts List
+For each component: Part Name — Specific Model — ₹Price — Why this choice
+Include: CPU, GPU, RAM (speed + capacity), Motherboard, Storage (primary + secondary if needed), PSU (wattage + efficiency rating), Case, CPU Cooler, any extras.
+Total estimated cost in ₹.
+
+## Compatibility Verification
+Confirm: CPU-Motherboard socket match, RAM compatibility, PCIe slot compatibility, PSU adequacy, case clearance for GPU and cooler. Flag any incompatibilities explicitly.
+
+## Performance Benchmarks
+For the primary use case (${pcU || 'general'}), give realistic FPS estimates at relevant resolutions, or rendering/export time benchmarks for creative work. Compare to one tier above and one tier below in budget.
+
+## Thermal & Power Analysis
+Expected temperatures under load, noise levels, power draw from wall. Any cooling concerns for Indian summer (35-45°C ambient).
+
+## Where to Buy in India
+Best platforms for each component with current availability notes. Mention if any part is better bought offline.
+
+## Future Upgrade Path
+What to upgrade first when budget allows, and when (6 months / 1 year / 2 years timeline).
+
+## Pro Tips & Pitfalls
+5 specific tips for building and buying this configuration in India. Include common seller tricks, warranty registration, and any import-only parts to avoid.`,
+
+      setup: `You are merit. Lab — gaming setup advisor for the Indian market.
+
+GAMING SETUP REQUEST:
+- Total Budget: ${pcB || 'Flexible'}
+- Gaming Style: ${pcU || 'General gaming'}
+- Notes: ${labN || 'None'}
+
+Give a complete, deeply detailed gaming setup recommendation. Use ## headers:
+
+## Setup Philosophy
+What kind of gaming experience this setup delivers and who it's ideal for.
+
+## Complete Parts List
+Monitor (panel type, Hz, resolution, response time, HDR) — ₹Price
+Chair (lumbar support, armrest type, material, max user weight) — ₹Price
+Keyboard (switch type, form factor, RGB, build quality) — ₹Price
+Mouse (DPI range, sensor, weight, grip style) — ₹Price
+Headset (driver size, surround, mic quality, comfort for long sessions) — ₹Price
+Mousepad (size, surface type) — ₹Price
+Desk (dimensions, cable management) — ₹Price
+Any extras (controller, capture card, stream deck if relevant)
+
+## Why Each Pick Wins for Indian Buyers
+For each component: why this specific model over competitors at this price in India.
+
+## Ergonomics & Health
+Monitor distance and height setup, chair posture tips for Indian body types and desk setups, break schedule recommendation.
+
+## Cable Management Guide
+How to route cables cleanly in this setup configuration.
+
+## Where to Buy
+Best Indian platforms per component. Which items have better offline deals (Croma, Vijay Sales, local gaming stores).
+
+## Upgrade Priority Order
+Which component to upgrade first for the biggest performance/comfort gain.`,
+
+      theater: `You are merit. Lab — home theater advisor for the Indian market.
+
+HOME THEATER REQUEST:
+- Total Budget: ${pcB || 'Flexible'}
+- Room Details: ${labN || 'Not specified — assume medium Indian living room 12x14 ft'}
+- Primary Use: ${pcU || 'All-rounder'}
+
+Deliver a complete, expert home theater recommendation. Use ## headers:
+
+## Room Analysis & Setup Geometry
+Optimal screen size for the room dimensions. Ideal viewing distance. Speaker placement geometry. Acoustic considerations for typical Indian apartments (hard walls, AC noise).
+
+## Display Recommendation
+TV or projector + screen? Specific model with panel technology, HDR standard (Dolby Vision / HDR10+), local dimming, peak brightness (nits), reflection handling for Indian rooms with multiple windows.
+
+## Audio System
+Full recommendation: soundbar with sub OR 5.1/7.1 system. Specific models, wattage, frequency response, Dolby Atmos support. How to place speakers in the room described.
+
+## Streaming & Sources
+Best streaming device for Indian OTT (Netflix, Prime, Hotstar, SonyLIV) + gaming if needed. HDMI 2.1 requirements if applicable.
+
+## Cabling & Installation
+HDMI versions needed, cable lengths, whether professional installation is worth it in India, cost estimate.
+
+## Total Cost Breakdown
+Itemized list with prices, total, and 10% contingency for cables/mounts/installation.
+
+## Indian Market Tips
+Best time to buy (festival sales), extended warranty advice, common pitfalls with Indian power supply (voltage fluctuation protection), streaming subscription bundle deals.`,
+    };
+
+    callAI(labPrompts[labMode]).then(() => {
+      setView('labResult');
+      setTimeout(() => rR.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    });
   };
 
-  const runQ = () => { callAI(`You are merit. Quiz results:\n1. Problem: ${qA[0] || '?'}\n2. For: ${qA[1] || '?'}\n3. Priority: ${qA[2] || '?'}\n4. Budget: ${qA[3] || '?'}\nCity: ${city || '?'}\n\nRespond:\n## You Need: [Category]\n## Top 3 Picks (model, ₹, why, con)\n## Why Not [Alternative]\n## Next Steps`).then(() => setView('quizResult')); };
-  const chkD = () => { callAI(`Deal check: ${dP} at ₹${dPr}, City: ${city || '?'}\n\n## Verdict: [GREAT/FAIR/OVERPRICED/RED FLAG]\n## Price Analysis\n## Red Flags\n## Counter-Offer Script\n## Better Alternatives`).then(() => setView('dealResult')); };
+  const runQ = () => {
+    callAI(`You are merit. — India's trusted tech advisor.
+
+Quiz answers:
+1. Problem to solve: ${qA[0] || '?'}
+2. Primary user: ${qA[1] || '?'}
+3. Top priority: ${qA[2] || '?'}
+4. Budget preference: ${qA[3] || '?'}
+Location: ${city || 'India'}
+
+Based on these answers, provide a focused recommendation. Use ## headers:
+
+## You Need: [Specific Product Category & Type]
+One sentence explaining exactly why.
+
+## Top 3 Picks
+For each: **Model Name** — ₹Price
+Why it fits: 2 sentences matching their stated priority
+Honest trade-off: 1 sentence
+
+## Skip This Temptation
+One common product people in this situation mistakenly buy, and why they regret it.
+
+## Buying Advice
+3 specific tips for buying this product in India right now.`).then(() => setView('quizResult'));
+  };
+
+  const chkD = () => {
+    callAI(`You are merit. — India's unbiased deal checker.
+
+Product: ${dP}
+Quoted price: ₹${dPr}
+City: ${city || 'India'}
+
+Analyse this deal thoroughly:
+
+## Verdict: [GREAT DEAL / FAIR PRICE / OVERPRICED / RED FLAG]
+One sentence summary.
+
+## Market Price Analysis
+Current price on Amazon, Flipkart, and brand website. Typical festival sale price. Historical price range.
+
+## What's Included vs. What Should Be
+What accessories/warranty should come standard. What they might be charging extra for illegitimately.
+
+## Red Flags
+Any signs of a bad deal, refurbished stock, grey market import, etc.
+
+## Negotiation Script
+Exact words to use to negotiate a better price or extract value (free accessories, extended warranty, etc.).
+
+## Better Alternatives
+2 alternatives at this price or lower that offer equal or better value right now.`).then(() => setView('dealResult'));
+  };
 
   const mC = cW && cH ? ((parseFloat(cW) * parseFloat(cH) * 30) / 1000 * parseFloat(cR || 8)).toFixed(0) : null;
   const termos = TERMO[cat] || TERMO.default || [];
@@ -236,29 +422,7 @@ Respond ONLY with valid JSON — no markdown, no code fences:
 
   /* ─── Parse JSON result ────────────────────── */
   let pR = null;
-  let jsonError = null;
-  try { 
-    if (result) { 
-      const start = result.indexOf('{');
-      const end = result.lastIndexOf('}');
-      if (start !== -1 && end !== -1 && end > start) {
-        let jsonStr = result.slice(start, end + 1);
-        try {
-          pR = JSON.parse(jsonStr);
-        } catch (err1) {
-          try {
-            // Fallback: aggressive sanitize (trailing commas & control chars)
-            let sanitized = jsonStr.replace(/,\s*([\]}])/g, '$1');
-            sanitized = sanitized.replace(/[\x00-\x1F\x7F-\x9F]/g, ' ');
-            pR = JSON.parse(sanitized);
-          } catch (err2) {
-            jsonError = "JSON Error: " + err2.message;
-            console.error("JSON parse failed", err2, "Raw string:", jsonStr);
-          }
-        }
-      }
-    } 
-  } catch (e) { console.error(e); }
+  try { if (result && result.includes('"recs"')) { const m = result.match(/\{[\s\S]*\}/); if (m) pR = JSON.parse(m[0]); } } catch (e) {}
 
   /* ─── Sub-components ───────────────────────── */
   const CI = ({ compact }) => (
@@ -712,18 +876,18 @@ Respond ONLY with valid JSON — no markdown, no code fences:
                 }}
               >
                 <div
-                  className="card"
+                  className="glass-card"
                   onClick={e => e.stopPropagation()}
                   style={{
                     width: '100%', maxWidth: 700,
-                    overflow: 'hidden', /* NO scroll — all content fits */
-                    animation: 'fadeUp .25s cubic-bezier(.22,1,.36,1)',
+                    overflow: 'hidden',
+                    animation: 'fadeUp .28s cubic-bezier(.22,1,.36,1)',
                     position: 'relative',
                     display: 'flex', flexDirection: 'column',
                   }}
                 >
                   {/* ── Header row ───────────────────────────────────── */}
-                  <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid rgba(0,0,0,0.07)', display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                  <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid rgba(255,255,255,0.35)', display: 'flex', alignItems: 'flex-start', gap: 14 }}>
                     {activeTile.brand_domain && (
                       <img
                         src={`https://logo.clearbit.com/${activeTile.brand_domain}`}
@@ -758,7 +922,7 @@ Respond ONLY with valid JSON — no markdown, no code fences:
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
 
                     {/* Left: summary + target + pros + cons */}
-                    <div style={{ padding: '16px 18px 16px 24px', borderRight: '1px solid rgba(0,0,0,0.07)' }}>
+                    <div style={{ padding: '16px 18px 16px 24px', borderRight: '1px solid rgba(255,255,255,0.3)' }}>
                       {/* Summary */}
                       <p style={{ fontSize: 12.5, color: 'var(--sub)', lineHeight: 1.6, marginBottom: 10 }}>
                         {activeTile.summary || activeTile.why}
@@ -766,7 +930,7 @@ Respond ONLY with valid JSON — no markdown, no code fences:
 
                       {/* Target */}
                       {activeTile.target && (
-                        <div style={{ fontSize: 12, color: 'var(--sub)', marginBottom: 12, padding: '7px 11px', background: 'var(--accentBg)', borderRadius: 8, lineHeight: 1.5 }}>
+                        <div style={{ fontSize: 12, color: 'var(--sub)', marginBottom: 12, padding: '7px 11px', background: 'rgba(217,119,6,0.10)', borderRadius: 8, lineHeight: 1.5, border: '1px solid rgba(217,119,6,0.15)' }}>
                           <strong style={{ color: 'var(--accent)' }}>🎯 </strong>{activeTile.target}
                         </div>
                       )}
@@ -809,7 +973,7 @@ Respond ONLY with valid JSON — no markdown, no code fences:
                           const label = colonIdx > -1 ? s.slice(0, colonIdx).trim() : `Spec ${i + 1}`;
                           const value = colonIdx > -1 ? s.slice(colonIdx + 1).trim() : s;
                           return (
-                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '7px 0', borderBottom: i < 4 ? '1px solid rgba(0,0,0,0.05)' : 'none', gap: 8 }}>
+                            <div key={i} className="glass-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '7px 0', gap: 8 }}>
                               <span style={{ fontSize: 11.5, color: 'var(--sub)', fontWeight: 600, flexShrink: 0 }}>{label}</span>
                               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', textAlign: 'right' }}>{value}</span>
                             </div>
@@ -817,9 +981,9 @@ Respond ONLY with valid JSON — no markdown, no code fences:
                         })}
                       </div>
 
-                      {/* Insider tip (from pR.insider if available) */}
+                      {/* Insider tip */}
                       {pR?.insider && (
-                        <div style={{ marginTop: 14, padding: '9px 12px', background: 'var(--accentBg)', borderRadius: 8, fontSize: 11.5, color: 'var(--sub)', lineHeight: 1.55, borderLeft: '3px solid var(--accent)' }}>
+                        <div style={{ marginTop: 14, padding: '9px 12px', background: 'rgba(217,119,6,0.10)', borderRadius: 8, fontSize: 11.5, color: 'var(--sub)', lineHeight: 1.55, borderLeft: '3px solid var(--accent)', border: '1px solid rgba(217,119,6,0.18)' }}>
                           <strong style={{ color: 'var(--accent)' }}>💡 Insider: </strong>{pR.insider}
                         </div>
                       )}
@@ -827,7 +991,7 @@ Respond ONLY with valid JSON — no markdown, no code fences:
                   </div>
 
                   {/* ── Action bar ───────────────────────────────────── */}
-                  <div style={{ padding: '14px 24px', borderTop: '1px solid rgba(0,0,0,0.07)', display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ padding: '14px 24px', borderTop: '1px solid rgba(255,255,255,0.35)', display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.15)' }}>
                     <button
                       className="btn btn-p"
                       onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(activeTile.name + ' buy india price')}`, '_blank')}
@@ -912,10 +1076,7 @@ Respond ONLY with valid JSON — no markdown, no code fences:
                 </div>
               </div>
             ) : (
-              <div className="card nm-flat" style={{ padding: '28px 26px', lineHeight: 1.7 }}>
-                {jsonError && <div style={{background: 'rgba(220,38,38,0.08)', color: '#b91c1c', padding: '12px 16px', borderRadius: 12, marginBottom: 20, fontSize: 13, fontWeight: 600}}>{jsonError}</div>}
-                {renderMD(result)}
-              </div>
+              <div className="card nm-flat" style={{ padding: '28px 26px', lineHeight: 1.7 }}>{renderMD(result)}</div>
             )}
 
             {/* Terminology */}

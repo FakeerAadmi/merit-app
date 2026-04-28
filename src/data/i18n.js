@@ -147,7 +147,20 @@ export const T = {
     wCeil:"Ceiling Fan", wTv:'LED TV 43"', wFr:"Fridge",
     wAc1:"1-ton AC", wAc15:"1.5-ton AC", wGey:"Geyser",
     wWash:"Washing Machine", wMic:"Microwave",
+    /* ── New categories ── */
+    cat_mo:"Monitors", cat_pu:"Air Purifiers", cat_va:"Vacuum Cleaners", cat_eb:"Electric Vehicles",
+    /* ── New priorities ── */
+    pri_refresh:"Refresh Rate",   pri_refresh_d:"Hz & response time",
+    pri_filter:"Filtration",      pri_filter_d:"HEPA & purification grade",
+    pri_suction:"Suction Power",  pri_suction_d:"Cleaning effectiveness",
+    pri_range:"Range",            pri_range_d:"KM per charge",
+    pri_connectivity:"Connectivity", pri_connectivity_d:"Ports, HDMI, USB-C",
+    pri_ergo:"Ergonomics",        pri_ergo_d:"Height & tilt adjustments",
+    pri_durability:"Durability",  pri_durability_d:"Long-lasting build",
+    pri_warranty:"Warranty",      pri_warranty_d:"After-sales support",
   },
+
+  mr: {
 
   mr: {
     /* ── Nav ── */
@@ -297,5 +310,16 @@ export const T = {
     wCeil:"सीलिंग फॅन", wTv:'LED TV 43"', wFr:"फ्रीज",
     wAc1:"१-टन AC", wAc15:"१.५-टन AC", wGey:"गिझर",
     wWash:"वॉशिंग मशीन", wMic:"मायक्रोवेव्ह",
+    /* ── New categories ── */
+    cat_mo:"मॉनिटर", cat_pu:"एअर प्युरिफायर", cat_va:"व्हॅक्युम क्लिनर", cat_eb:"इलेक्ट्रिक वाहने",
+    /* ── New priorities ── */
+    pri_refresh:"रिफ्रेश रेट",    pri_refresh_d:"Hz आणि रिस्पॉन्स टाइम",
+    pri_filter:"फिल्ट्रेशन",       pri_filter_d:"HEPA आणि शुद्धीकरण",
+    pri_suction:"सक्शन पॉवर",      pri_suction_d:"सफाईची परिणामकारकता",
+    pri_range:"रेंज",              pri_range_d:"प्रति चार्ज किमी",
+    pri_connectivity:"कनेक्टिव्हिटी", pri_connectivity_d:"पोर्ट्स, HDMI, USB-C",
+    pri_ergo:"एर्गोनॉमिक्स",       pri_ergo_d:"उंची आणि टिल्ट समायोजन",
+    pri_durability:"टिकाऊपणा",     pri_durability_d:"दीर्घकाळ टिकणारी बांधणी",
+    pri_warranty:"वॉरंटी",         pri_warranty_d:"विक्रीपश्चात सेवा",
   }
 };
