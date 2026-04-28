@@ -181,7 +181,7 @@ export default function App() {
     setLoading(true);setError('');setResult('');
     try{
       const isJson=prompt.includes('valid JSON');
-      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt+langI}]}],generationConfig:{temperature:0.7,maxOutputTokens:6000,...(isJson&&{responseMimeType:'application/json'})}})});
+      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt+langI}]}],generationConfig:{temperature:0.7,maxOutputTokens:6000,...(isJson&&{responseMimeType:'application/json'})},safetySettings:[{category:"HARM_CATEGORY_SEXUALLY_EXPLICIT",threshold:"BLOCK_NONE"},{category:"HARM_CATEGORY_HATE_SPEECH",threshold:"BLOCK_NONE"},{category:"HARM_CATEGORY_HARASSMENT",threshold:"BLOCK_NONE"},{category:"HARM_CATEGORY_DANGEROUS_CONTENT",threshold:"BLOCK_NONE"}]})});
       if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`Error ${r.status}`);}
       const d=await r.json();const tx=d?.candidates?.[0]?.content?.parts?.[0]?.text;
       if(!tx)throw new Error('Empty response');setResult(tx);
